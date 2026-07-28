@@ -25,6 +25,51 @@
  */
 
 /**
+ * Returns theme design token variables for 4 distinct glassmorphism aesthetic presets.
+ * @returns {Record<string, { label: string, bgCard: string, textMain: string, textMuted: string, accent: string, rangeBg: string, borderColor: string }>}
+ */
+export function getThemePresets() {
+  return {
+    dark: {
+      label: 'Dark Glass',
+      bgCard: 'rgba(15, 23, 42, 0.95)',
+      textMain: '#f8fafc',
+      textMuted: '#94a3b8',
+      accent: '#8b5cf6',
+      rangeBg: 'rgba(139, 92, 246, 0.2)',
+      borderColor: 'rgba(255, 255, 255, 0.12)'
+    },
+    cyber: {
+      label: 'Cyber Neon',
+      bgCard: 'rgba(6, 18, 36, 0.96)',
+      textMain: '#00f6ff',
+      textMuted: '#70a0c0',
+      accent: '#ff007f',
+      rangeBg: 'rgba(255, 0, 127, 0.25)',
+      borderColor: 'rgba(0, 246, 255, 0.25)'
+    },
+    light: {
+      label: 'Solar Light',
+      bgCard: 'rgba(255, 255, 255, 0.96)',
+      textMain: '#0f172a',
+      textMuted: '#64748b',
+      accent: '#2563eb',
+      rangeBg: 'rgba(37, 99, 235, 0.15)',
+      borderColor: 'rgba(0, 0, 0, 0.12)'
+    },
+    midnight: {
+      label: 'Midnight Blue',
+      bgCard: 'rgba(10, 15, 30, 0.98)',
+      textMain: '#e2e8f0',
+      textMuted: '#64748b',
+      accent: '#06b6d4',
+      rangeBg: 'rgba(6, 182, 212, 0.2)',
+      borderColor: 'rgba(6, 182, 212, 0.2)'
+    }
+  };
+}
+
+/**
  * Returns array of selectable year integers.
  * @param {number} [startYear=2020] 
  * @param {number} [endYear=2035] 

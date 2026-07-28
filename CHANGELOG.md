@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-07-28
+
+### Added
+- Integrated **Date Picker Dark/Light Glassmorphism Theme Preset Vault** in `datePickerService.js` and `public/nexus-date-picker.js` (Major Release v1.0.0).
+- Added theme design token dictionaries (`getThemePresets`) supporting 4 theme presets: `dark` (Dark Glass), `cyber` (Cyber Neon), `light` (Solar Light), and `midnight` (Midnight Blue).
+- Updated `<nexus-date-picker>` CSS variable binding in Shadow DOM `:host` based on `theme` attribute reactivity.
+- Added Theme selection dropdown options in live controls configurator in `public/index.html`.
+- Added unit tests in `datePickerService.spec.js` (20 total unit tests passing).
+
 ## [0.9.0] - 2026-07-28
 
 ### Added

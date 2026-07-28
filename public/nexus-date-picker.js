@@ -7,6 +7,7 @@ import {
   getPresetRanges,
   getRelativePresets,
   getYearOptions,
+  getThemePresets,
   getNextMonth,
   getSampleEvents,
   getLocaleTranslations,
@@ -400,6 +401,9 @@ class NexusDatePicker extends HTMLElement {
       events
     } = this.state;
 
+    const themeVault = getThemePresets();
+    const currentTheme = themeVault[theme] || themeVault.dark;
+
     const grid1 = generateCalendarGrid(year, month, {
       selectedDate: value,
       rangeStart,
@@ -436,17 +440,17 @@ class NexusDatePicker extends HTMLElement {
         :host {
           display: inline-block;
           font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          --bg-card: ${theme === 'dark' ? 'rgba(15, 23, 42, 0.95)' : '#ffffff'};
-          --text-main: ${theme === 'dark' ? '#f8fafc' : '#0f172a'};
-          --text-muted: ${theme === 'dark' ? '#94a3b8' : '#64748b'};
-          --border-color: ${theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)'};
-          --accent-purple: #8b5cf6;
-          --range-bg: rgba(139, 92, 246, 0.2);
+          --bg-card: ${currentTheme.bgCard};
+          --text-main: ${currentTheme.textMain};
+          --text-muted: ${currentTheme.textMuted};
+          --border-color: ${currentTheme.borderColor};
+          --accent-purple: ${currentTheme.accent};
+          --range-bg: ${currentTheme.rangeBg};
           position: relative;
         }
 
         .picker-trigger {
-          background: ${theme === 'dark' ? 'rgba(30, 41, 59, 0.8)' : '#f8fafc'};
+          background: var(--bg-card);
           border: 1px solid var(--border-color);
           color: var(--text-main);
           padding: 10px 16px;
@@ -522,7 +526,7 @@ class NexusDatePicker extends HTMLElement {
         }
 
         .preset-btn:hover, .preset-btn:focus-visible {
-          background: rgba(139, 92, 246, 0.15);
+          background: var(--range-bg);
           color: var(--accent-purple);
           outline: none;
         }
@@ -541,7 +545,7 @@ class NexusDatePicker extends HTMLElement {
         }
 
         .header-select {
-          background: rgba(30, 41, 59, 0.8);
+          background: var(--bg-card);
           border: 1px solid var(--border-color);
           color: var(--text-main);
           padding: 4px 8px;
@@ -571,7 +575,7 @@ class NexusDatePicker extends HTMLElement {
         }
 
         .nav-btn:hover, .nav-btn:focus-visible {
-          background: rgba(139, 92, 246, 0.2);
+          background: var(--range-bg);
           border-color: var(--accent-purple);
           outline: none;
         }
@@ -614,8 +618,8 @@ class NexusDatePicker extends HTMLElement {
         }
 
         .day-cell:hover:not(.disabled), .day-cell:focus-visible:not(.disabled) {
-          background: rgba(139, 92, 246, 0.25);
-          color: #ffffff;
+          background: var(--range-bg);
+          color: var(--text-main);
           border-color: var(--accent-purple);
         }
 
@@ -671,7 +675,7 @@ class NexusDatePicker extends HTMLElement {
         }
 
         .time-input {
-          background: rgba(30, 41, 59, 0.8);
+          background: var(--bg-card);
           border: 1px solid var(--border-color);
           color: var(--text-main);
           padding: 6px 10px;

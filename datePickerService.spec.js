@@ -11,6 +11,7 @@ import {
   getLocaleTranslations,
   getRelativePresets,
   getYearOptions,
+  getThemePresets,
   validateFormAssociation,
   formatDate,
   formatDateTime,
@@ -28,6 +29,14 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('retrieves theme design token presets (dark, cyber, light, midnight)', () => {
+    const themes = getThemePresets();
+    expect(Object.keys(themes).length).toBe(4);
+    expect(themes.dark.label).toBe('Dark Glass');
+    expect(themes.cyber.accent).toBe('#ff007f');
+    expect(themes.midnight.label).toBe('Midnight Blue');
   });
 
   it('generates array of selectable year integers for quick year jump', () => {
