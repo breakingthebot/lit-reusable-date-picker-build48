@@ -9,6 +9,7 @@ import {
   getNextMonth,
   getSampleEvents,
   getLocaleTranslations,
+  getRelativePresets,
   validateFormAssociation,
   formatDate,
   formatDateTime,
@@ -26,6 +27,13 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('retrieves relative forward jump presets (+7d, +14d, +30d, +90d)', () => {
+    const relativePresets = getRelativePresets();
+    expect(relativePresets.length).toBe(4);
+    expect(relativePresets[0].key).toBe('next_7_days');
+    expect(relativePresets[2].key).toBe('next_30_days');
   });
 
   it('validates form association required and min/max date constraints', () => {

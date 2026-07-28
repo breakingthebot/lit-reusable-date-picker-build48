@@ -2,8 +2,8 @@
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Demo-000000?style=for-the-badge&logo=vercel)](https://lit-reusable-date-picker-build48.vercel.app)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/breakingthebot/lit-reusable-date-picker-build48)
-[![Tests](https://img.shields.io/badge/Vitest-17%20Passed-6E9F18?style=for-the-badge&logo=vitest)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/datePickerService.spec.js)
-[![Version](https://img.shields.io/badge/Release-v0.7.0-blue?style=for-the-badge)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/Vitest-18%20Passed-6E9F18?style=for-the-badge&logo=vitest)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/datePickerService.spec.js)
+[![Version](https://img.shields.io/badge/Release-v0.8.0-blue?style=for-the-badge)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/CHANGELOG.md)
 
 ---
 
@@ -20,6 +20,7 @@
 ## 🔥 Key Features
 
 - **🧩 Framework-Agnostic Web Component**: Encapsulated Shadow DOM element (`<nexus-date-picker>`) compatible with React, Vue, Angular, Svelte, and Vanilla JS.
+- **⚡ Forward Jump Relative Presets (+7d / +30d / +90d)**: Rapid future date range shortcuts allowing single-click selection of upcoming project windows.
 - **📝 Form Associated Custom Element & Input Sync**: Native `<form>` integration (`formAssociated = true`, `ElementInternals`, `name`, `required`) with hidden value binding and constraint validation.
 - **🌍 Multilingual i18n & Locale Engine**: Configurable localization (`locale="en|es|fr|de"`) with translated month names and configurable start-of-week (`first-day-of-week="0|1"` for Sunday or Monday).
 - **📌 Custom Highlight Markers & Event Badges**: Configurable event markers (`enable-events="true"`) rendering colored dot indicators, hover tooltips, and event payload details.

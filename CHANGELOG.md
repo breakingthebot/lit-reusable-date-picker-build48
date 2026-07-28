@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-07-28
+
+### Added
+- Integrated **Date Picker Min/Max Relative Shortcut Presets (+7d / +30d)** in `datePickerService.js` and `public/nexus-date-picker.js`.
+- Added forward relative date range calculator (`getRelativePresets`).
+- Updated `<nexus-date-picker>` preset sidebar rendering section headers (*Past Presets*, *Future Jumps*) with relative jump buttons (`Next 7 Days (+7d)`, `Next 14 Days (+14d)`, `Next 30 Days (+30d)`, `Next 90 Days (+90d)`).
+- Added unit tests in `datePickerService.spec.js` (18 total unit tests passing).
+
 ## [0.7.0] - 2026-07-28
 
 ### Added

@@ -5,6 +5,7 @@
 import {
   generateCalendarGrid,
   getPresetRanges,
+  getRelativePresets,
   getNextMonth,
   getSampleEvents,
   getLocaleTranslations,
@@ -414,7 +415,9 @@ class NexusDatePicker extends HTMLElement {
       });
     }
 
-    const presets = getPresetRanges();
+    const pastPresets = getPresetRanges();
+    const relativePresets = getRelativePresets();
+    const allPresets = [...pastPresets, ...relativePresets];
     const submitVal = this.getSubmitValue();
 
     this.shadowRoot.innerHTML = `
@@ -478,20 +481,31 @@ class NexusDatePicker extends HTMLElement {
         .presets-sidebar {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 4px;
           border-right: 1px solid var(--border-color);
           padding-right: 16px;
-          min-width: 130px;
+          min-width: 140px;
+          max-height: 280px;
+          overflow-y: auto;
+        }
+
+        .preset-section-header {
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          margin: 6px 0 2px 0;
+          letter-spacing: 0.5px;
         }
 
         .preset-btn {
           background: transparent;
           border: none;
           color: var(--text-muted);
-          padding: 6px 10px;
-          border-radius: 8px;
+          padding: 5px 8px;
+          border-radius: 6px;
           text-align: left;
-          font-size: 13px;
+          font-size: 12px;
           cursor: pointer;
           transition: all 0.2s ease;
         }
@@ -662,8 +676,13 @@ class NexusDatePicker extends HTMLElement {
         <div class="dropdown-content">
           ${mode === 'range' ? `
             <div class="presets-sidebar" role="menu" aria-label="Quick date presets">
-              <strong style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Presets</strong>
-              ${presets.map(p => `
+              <span class="preset-section-header">Past Presets</span>
+              ${pastPresets.map(p => `
+                <button type="button" class="preset-btn" data-preset="${p.key}" role="menuitem">${p.label}</button>
+              `).join('')}
+
+              <span class="preset-section-header">Future Jumps</span>
+              ${relativePresets.map(p => `
                 <button type="button" class="preset-btn" data-preset="${p.key}" role="menuitem">${p.label}</button>
               `).join('')}
             </div>
@@ -713,7 +732,7 @@ class NexusDatePicker extends HTMLElement {
     this.shadowRoot.querySelectorAll('.preset-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const key = e.currentTarget.getAttribute('data-preset');
-        const preset = presets.find(p => p.key === key);
+        const preset = allPresets.find(p => p.key === key);
         if (preset) this.applyPreset(preset);
       });
     });

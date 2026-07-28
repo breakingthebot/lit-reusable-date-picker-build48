@@ -25,6 +25,34 @@
  */
 
 /**
+ * Returns forward relative date jump preset options (+7d, +14d, +30d, +90d).
+ * @returns {Array<{ label: string, key: string, rangeStart: string, rangeEnd: string }>}
+ */
+export function getRelativePresets() {
+  const now = new Date();
+  const todayStr = formatDate(now, 'YYYY-MM-DD');
+
+  const in7 = new Date(now);
+  in7.setDate(now.getDate() + 6);
+
+  const in14 = new Date(now);
+  in14.setDate(now.getDate() + 13);
+
+  const in30 = new Date(now);
+  in30.setDate(now.getDate() + 29);
+
+  const in90 = new Date(now);
+  in90.setDate(now.getDate() + 89);
+
+  return [
+    { label: 'Next 7 Days (+7d)', key: 'next_7_days', rangeStart: todayStr, rangeEnd: formatDate(in7, 'YYYY-MM-DD') },
+    { label: 'Next 14 Days (+14d)', key: 'next_14_days', rangeStart: todayStr, rangeEnd: formatDate(in14, 'YYYY-MM-DD') },
+    { label: 'Next 30 Days (+30d)', key: 'next_30_days', rangeStart: todayStr, rangeEnd: formatDate(in30, 'YYYY-MM-DD') },
+    { label: 'Next 90 Days (+90d)', key: 'next_90_days', rangeStart: todayStr, rangeEnd: formatDate(in90, 'YYYY-MM-DD') }
+  ];
+}
+
+/**
  * Validates form constraints for Form Associated Custom Element.
  * @param {string} value 
  * @param {Object} options 
