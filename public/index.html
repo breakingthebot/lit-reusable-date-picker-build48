@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lit Reusable Date Picker Web Component — NexusCloud Enterprise AI</title>
+  <meta name="description" content="Framework-agnostic custom date-picker web component built with Lit 3.x. Supports single & range selection, dark/light themes, and works in React, Vue, Angular, Svelte, or Vanilla JS.">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/nexus-date-picker.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <a href="/" class="brand-logo">
+        <span>📅 NexusCloud Lit Web Component</span>
+        <span class="brand-badge">Build 48 (v0.1.0)</span>
+      </a>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <span style="font-size: 13px; color: var(--text-muted);">Framework-Agnostic UI</span>
+      </div>
+    </nav>
+
+    <!-- Hero Header -->
+    <header class="hero-header">
+      <h1 class="hero-title">Reusable Web Component Date Picker</h1>
+      <p class="hero-subtitle">
+        Built with Lit 3.x and Shadow DOM. Plug-and-play into any frontend stack—React, Vue, Angular, Svelte, or pure Vanilla HTML/JS.
+      </p>
+    </header>
+
+    <!-- Main Playground Grid -->
+    <div class="playground-grid">
+      <!-- Live Web Component Interactive Preview -->
+      <div class="card-glass">
+        <h2 class="card-title">🧪 Live Web Component Demo</h2>
+        <p class="card-desc">Interact with the custom element below. Expand calendar, select single dates or preset ranges.</p>
+
+        <div style="display: flex; justify-content: center; padding: 40px 0; min-height: 220px;">
+          <nexus-date-picker 
+            id="demoPicker" 
+            mode="range" 
+            format="YYYY-MM-DD" 
+            theme="dark"
+          ></nexus-date-picker>
+        </div>
+
+        <div class="output-banner">
+          <strong>📢 Dispatched Custom Event Log:</strong>
+          <div id="eventOutput" style="margin-top: 6px; font-family: monospace;">
+            <em>Waiting for date selection...</em>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Component Controls Configurator -->
+      <div class="card-glass">
+        <h2 class="card-title">⚙️ Web Component Attributes</h2>
+        <p class="card-desc">Tweak HTML attributes in real-time to observe component reactivity.</p>
+
+        <div class="control-group">
+          <label class="control-label">Selection Mode (mode)</label>
+          <select id="modeSelect" class="form-select">
+            <option value="range">Range Selection (mode="range")</option>
+            <option value="single">Single Date (mode="single")</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Date Format Pattern (format)</label>
+          <select id="formatSelect" class="form-select">
+            <option value="YYYY-MM-DD">ISO Standard (YYYY-MM-DD)</option>
+            <option value="MM/DD/YYYY">US Standard (MM/DD/YYYY)</option>
+            <option value="DD/MM/YYYY">UK / EU Standard (DD/MM/YYYY)</option>
+            <option value="MMM DD, YYYY">Long Text (MMM DD, YYYY)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Theme Variable (theme)</label>
+          <select id="themeSelect" class="form-select">
+            <option value="dark">🌙 Dark Mode (theme="dark")</option>
+            <option value="light">☀️ Light Mode (theme="light")</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="control-group">
+            <label class="control-label">Minimum Date (min-date)</label>
+            <input type="date" id="minDateInput" class="form-input">
+          </div>
+          <div class="control-group">
+            <label class="control-label">Maximum Date (max-date)</label>
+            <input type="date" id="maxDateInput" class="form-input">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Framework Code Integration Vault -->
+    <div class="card-glass">
+      <h2 class="card-title">💻 Framework Integration Vault</h2>
+      <p class="card-desc">Copy-paste ready implementation code snippets for your preferred framework.</p>
+
+      <div class="framework-tabs">
+        <button type="button" class="tab-btn active" data-framework="react">React Component</button>
+        <button type="button" class="tab-btn" data-framework="vue">Vue 3 Composition API</button>
+        <button type="button" class="tab-btn" data-framework="angular">Angular 17+</button>
+        <button type="button" class="tab-btn" data-framework="svelte">Svelte 4/5</button>
+        <button type="button" class="tab-btn" data-framework="vanilla">Vanilla HTML/JS</button>
+      </div>
+
+      <div>
+        <button type="button" class="btn-copy" id="btnCopyCode">📋 Copy Snippet</button>
+        <pre class="code-block" id="codeDisplay"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const picker = document.getElementById('demoPicker');
+      const eventOutput = document.getElementById('eventOutput');
+      const modeSelect = document.getElementById('modeSelect');
+      const formatSelect = document.getElementById('formatSelect');
+      const themeSelect = document.getElementById('themeSelect');
+      const minDateInput = document.getElementById('minDateInput');
+      const maxDateInput = document.getElementById('maxDateInput');
+
+      const codeDisplay = document.getElementById('codeDisplay');
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const btnCopyCode = document.getElementById('btnCopyCode');
+
+      let currentFramework = 'react';
+
+      // 1. Handle Dispatched Component Events
+      picker.addEventListener('date-select', (e) => {
+        eventOutput.innerHTML = `<strong>date-select:</strong> <code>${JSON.stringify(e.detail)}</code>`;
+      });
+
+      picker.addEventListener('range-select', (e) => {
+        eventOutput.innerHTML = `<strong>range-select:</strong> <code>${JSON.stringify(e.detail)}</code>`;
+      });
+
+      // 2. Control Input Watchers
+      modeSelect.addEventListener('change', (e) => picker.setAttribute('mode', e.target.value));
+      formatSelect.addEventListener('change', (e) => picker.setAttribute('format', e.target.value));
+      themeSelect.addEventListener('change', (e) => picker.setAttribute('theme', e.target.value));
+      minDateInput.addEventListener('change', (e) => picker.setAttribute('min-date', e.target.value));
+      maxDateInput.addEventListener('change', (e) => picker.setAttribute('max-date', e.target.value));
+
+      // 3. Load Snippet API
+      function loadSnippet(framework) {
+        currentFramework = framework;
+        const mode = modeSelect.value;
+        fetch(`/api/snippets?framework=${framework}&mode=${mode}`)
+          .then(res => res.json())
+          .then(data => {
+            codeDisplay.textContent = data.snippet;
+          });
+      }
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          tabBtns.forEach(b => b.classList.remove('active'));
+          e.currentTarget.classList.add('active');
+          const fw = e.currentTarget.getAttribute('data-framework');
+          loadSnippet(fw);
+        });
+      });
+
+      btnCopyCode.addEventListener('click', () => {
+        navigator.clipboard.writeText(codeDisplay.textContent);
+        btnCopyCode.textContent = '✅ Copied!';
+        setTimeout(() => btnCopyCode.textContent = '📋 Copy Snippet', 2000);
+      });
+
+      loadSnippet('react');
+    });
+  </script>
+</body>
+</html>

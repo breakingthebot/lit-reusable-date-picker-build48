@@ -1,0 +1,29 @@
+{
+  "name": "lit-reusable-date-picker-build48",
+  "version": "0.1.0",
+  "description": "Enterprise Lit 3.x Reusable Web Component Date Picker — Single & Range Selection, Framework-Agnostic, Dark Theme & Accessibility",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0"
+  },
+  "keywords": [
+    "lit",
+    "web-components",
+    "date-picker",
+    "range-picker",
+    "lit-element",
+    "express",
+    "vitest"
+  ],
+  "author": "NexusCloud Engineering",
+  "license": "MIT"
+}
