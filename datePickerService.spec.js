@@ -13,6 +13,8 @@ import {
   getYearOptions,
   getThemePresets,
   createAnalyticsTracker,
+  generateIcsFile,
+  generateGoogleCalendarUrl,
   validateFormAssociation,
   formatDate,
   formatDateTime,
@@ -30,6 +32,18 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('generates iCalendar (.ics) string format and Google Calendar event URLs', () => {
+    const ics = generateIcsFile('2026-07-10', '2026-07-20', 'Sprint Review');
+    expect(ics).toContain('BEGIN:VCALENDAR');
+    expect(ics).toContain('SUMMARY:Sprint Review');
+    expect(ics).toContain('DTSTART;VALUE=DATE:20260710');
+
+    const gcalUrl = generateGoogleCalendarUrl('2026-07-10', '2026-07-20', 'Sprint Review');
+    expect(gcalUrl).toContain('https://calendar.google.com/calendar/render?action=TEMPLATE');
+    expect(gcalUrl).toContain('text=Sprint%20Review');
+    expect(gcalUrl).toContain('dates=20260710/20260720');
   });
 
   it('tracks real-time funnel analytics (opens, selections, preset clicks)', () => {

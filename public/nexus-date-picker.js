@@ -9,6 +9,8 @@ import {
   getYearOptions,
   getThemePresets,
   createAnalyticsTracker,
+  generateIcsFile,
+  generateGoogleCalendarUrl,
   getNextMonth,
   getSampleEvents,
   getLocaleTranslations,
@@ -26,7 +28,7 @@ class NexusDatePicker extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['mode', 'format', 'theme', 'locale', 'first-day-of-week', 'enable-time', 'enable-events', 'view-months', 'name', 'required', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
+    return ['mode', 'format', 'theme', 'locale', 'first-day-of-week', 'enable-time', 'enable-events', 'enable-export', 'view-months', 'name', 'required', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
   }
 
   constructor() {
@@ -48,6 +50,7 @@ class NexusDatePicker extends HTMLElement {
       firstDayOfWeek: parseInt(this.getAttribute('first-day-of-week') || '0'),
       enableTime: this.getAttribute('enable-time') === 'true',
       enableEvents: this.getAttribute('enable-events') === 'true',
+      enableExport: this.getAttribute('enable-export') === 'true',
       viewMonths: parseInt(this.getAttribute('view-months') || '1'),
       name: this.getAttribute('name') || 'datePicker',
       required: this.getAttribute('required') === 'true',
@@ -87,6 +90,7 @@ class NexusDatePicker extends HTMLElement {
     if (name === 'first-day-of-week') this.state.firstDayOfWeek = parseInt(newValue || '0');
     if (name === 'enable-time') this.state.enableTime = newValue === 'true';
     if (name === 'enable-events') this.state.enableEvents = newValue === 'true';
+    if (name === 'enable-export') this.state.enableExport = newValue === 'true';
     if (name === 'view-months') this.state.viewMonths = parseInt(newValue || '1');
     if (name === 'name') this.state.name = newValue || 'datePicker';
     if (name === 'required') this.state.required = newValue === 'true';
@@ -129,6 +133,32 @@ class NexusDatePicker extends HTMLElement {
       composed: true,
       detail: { eventType, metrics: summary }
     }));
+  }
+
+  downloadIcsFile() {
+    const start = this.state.mode === 'range' ? this.state.rangeStart : this.state.value;
+    const end = this.state.mode === 'range' ? this.state.rangeEnd : this.state.value;
+
+    if (!start) return;
+
+    const icsData = generateIcsFile(start, end);
+    const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = 'appointment.ics';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  openGoogleCalendar() {
+    const start = this.state.mode === 'range' ? this.state.rangeStart : this.state.value;
+    const end = this.state.mode === 'range' ? this.state.rangeEnd : this.state.value;
+
+    if (!start) return;
+
+    const url = generateGoogleCalendarUrl(start, end);
+    window.open(url, '_blank');
   }
 
   getSubmitValue() {
@@ -232,7 +262,7 @@ class NexusDatePicker extends HTMLElement {
 
     if (this.state.mode === 'single') {
       this.state.value = dateStr;
-      if (!this.state.enableTime) {
+      if (!this.state.enableTime && !this.state.enableExport) {
         this.state.isOpen = false;
       }
 
@@ -258,7 +288,7 @@ class NexusDatePicker extends HTMLElement {
           this.state.rangeStart = dateStr;
         } else {
           this.state.rangeEnd = dateStr;
-          if (!this.state.enableTime) {
+          if (!this.state.enableTime && !this.state.enableExport) {
             this.state.isOpen = false;
           }
 
@@ -293,7 +323,9 @@ class NexusDatePicker extends HTMLElement {
     this.state.rangeStart = preset.rangeStart;
     this.state.rangeEnd = preset.rangeEnd;
     this.state.mode = 'range';
-    this.state.isOpen = false;
+    if (!this.state.enableExport) {
+      this.state.isOpen = false;
+    }
 
     const startFmt = formatDate(preset.rangeStart, this.state.format);
     const endFmt = formatDate(preset.rangeEnd, this.state.format);
@@ -408,6 +440,7 @@ class NexusDatePicker extends HTMLElement {
       firstDayOfWeek,
       enableTime,
       enableEvents,
+      enableExport,
       viewMonths,
       name,
       required,
@@ -686,6 +719,35 @@ class NexusDatePicker extends HTMLElement {
           padding-top: 12px;
         }
 
+        .export-toolbar {
+          display: flex;
+          gap: 8px;
+          border-top: 1px solid var(--border-color);
+          padding-top: 12px;
+        }
+
+        .export-btn {
+          flex: 1;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid var(--border-color);
+          color: var(--text-main);
+          padding: 6px 10px;
+          border-radius: 8px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          transition: all 0.2s ease;
+        }
+
+        .export-btn:hover {
+          background: var(--range-bg);
+          border-color: var(--accent-purple);
+        }
+
         .time-label {
           font-size: 13px;
           font-weight: 600;
@@ -745,6 +807,13 @@ class NexusDatePicker extends HTMLElement {
             <input type="time" class="time-input" value="${time}">
           </div>
         ` : ''}
+
+        ${enableExport ? `
+          <div class="export-toolbar">
+            <button type="button" class="export-btn btn-ics">📥 Export .ics</button>
+            <button type="button" class="export-btn btn-gcal">📅 Add to Google Calendar</button>
+          </div>
+        ` : ''}
       </div>
     `;
 
@@ -782,6 +851,11 @@ class NexusDatePicker extends HTMLElement {
         this.updateFormValue();
         this.render();
       });
+    }
+
+    if (enableExport) {
+      this.shadowRoot.querySelector('.btn-ics')?.addEventListener('click', () => this.downloadIcsFile());
+      this.shadowRoot.querySelector('.btn-gcal')?.addEventListener('click', () => this.openGoogleCalendar());
     }
 
     this.shadowRoot.querySelectorAll('.day-cell:not(.disabled)').forEach(btn => {

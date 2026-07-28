@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-07-28
+
+### Added
+- Integrated **Date Picker Export & Calendar Event (.ics / Google Calendar) Syncer** in `datePickerService.js` and `public/nexus-date-picker.js`.
+- Added iCalendar (.ics) file string generator (`generateIcsFile`) and Google Calendar web URL builder (`generateGoogleCalendarUrl`).
+- Updated `<nexus-date-picker>` with attribute `enable-export="true"`, rendering an Export Toolbar at the bottom of the date picker modal featuring `.ics` file download and Google Calendar web redirect.
+- Added Calendar Export Toolbar toggle checkbox in live controls configurator in `public/index.html`.
+- Added unit tests in `datePickerService.spec.js` (22 total unit tests passing).
+
 ## [1.1.0] - 2026-07-28
 
 ### Added

@@ -25,6 +25,57 @@
  */
 
 /**
+ * Generates iCalendar (.ics) format file string for a selected date range.
+ * @param {string} startDateStr - YYYY-MM-DD
+ * @param {string} endDateStr - YYYY-MM-DD
+ * @param {string} [title='Scheduled Appointment']
+ * @param {string} [description='Exported from NexusCloud Lit Date Picker']
+ * @returns {string}
+ */
+export function generateIcsFile(startDateStr, endDateStr, title = 'Scheduled Appointment', description = 'Exported from NexusCloud Lit Date Picker') {
+  if (!startDateStr) return '';
+  const startCompact = startDateStr.replace(/-/g, '');
+  const endCompact = (endDateStr || startDateStr).replace(/-/g, '');
+
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//NexusCloud//Lit Date Picker//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `SUMMARY:${title}`,
+    `DESCRIPTION:${description}`,
+    `DTSTART;VALUE=DATE:${startCompact}`,
+    `DTEND;VALUE=DATE:${endCompact}`,
+    'STATUS:CONFIRMED',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+}
+
+/**
+ * Generates Google Calendar event creation web URL.
+ * @param {string} startDateStr - YYYY-MM-DD
+ * @param {string} endDateStr - YYYY-MM-DD
+ * @param {string} [title='Scheduled Appointment']
+ * @param {string} [description='Exported from NexusCloud Lit Date Picker']
+ * @returns {string}
+ */
+export function generateGoogleCalendarUrl(startDateStr, endDateStr, title = 'Scheduled Appointment', description = 'Exported from NexusCloud Lit Date Picker') {
+  if (!startDateStr) return '';
+  const startCompact = startDateStr.replace(/-/g, '');
+  const endCompact = (endDateStr || startDateStr).replace(/-/g, '');
+
+  const baseUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE';
+  const text = encodeURIComponent(title);
+  const details = encodeURIComponent(description);
+  const dates = `${startCompact}/${endCompact}`;
+
+  return `${baseUrl}&text=${text}&details=${details}&dates=${dates}`;
+}
+
+/**
  * Creates real-time funnel analytics tracker object.
  * @returns {{ opens: number, selections: number, presetClicks: number, logOpen: Function, logSelection: Function, logPreset: Function, getSummary: Function }}
  */
