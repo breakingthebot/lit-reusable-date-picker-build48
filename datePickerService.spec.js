@@ -10,6 +10,7 @@ import {
   getSampleEvents,
   getLocaleTranslations,
   getRelativePresets,
+  getYearOptions,
   validateFormAssociation,
   formatDate,
   formatDateTime,
@@ -27,6 +28,13 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('generates array of selectable year integers for quick year jump', () => {
+    const years = getYearOptions(2020, 2035);
+    expect(years.length).toBe(16);
+    expect(years[0]).toBe(2020);
+    expect(years[15]).toBe(2035);
   });
 
   it('retrieves relative forward jump presets (+7d, +14d, +30d, +90d)', () => {

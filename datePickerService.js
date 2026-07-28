@@ -25,6 +25,20 @@
  */
 
 /**
+ * Returns array of selectable year integers.
+ * @param {number} [startYear=2020] 
+ * @param {number} [endYear=2035] 
+ * @returns {number[]}
+ */
+export function getYearOptions(startYear = 2020, endYear = 2035) {
+  const years = [];
+  for (let y = startYear; y <= endYear; y++) {
+    years.push(y);
+  }
+  return years;
+}
+
+/**
  * Returns forward relative date jump preset options (+7d, +14d, +30d, +90d).
  * @returns {Array<{ label: string, key: string, rangeStart: string, rangeEnd: string }>}
  */

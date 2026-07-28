@@ -6,6 +6,7 @@ import {
   generateCalendarGrid,
   getPresetRanges,
   getRelativePresets,
+  getYearOptions,
   getNextMonth,
   getSampleEvents,
   getLocaleTranslations,
@@ -313,12 +314,22 @@ class NexusDatePicker extends HTMLElement {
   renderMonthPanel(year, month, grid, isSecondMonth = false) {
     const t = getLocaleTranslations(this.state.locale);
     const weekdays = this.state.firstDayOfWeek === 1 ? t.weekdaysMon : t.weekdaysSun;
+    const yearOptions = getYearOptions(2020, 2035);
 
     return `
       <div class="calendar-main">
         <div class="header-nav">
           ${!isSecondMonth ? `<button type="button" class="nav-btn btn-prev" aria-label="Previous month">◀</button>` : '<div></div>'}
-          <span class="month-title" aria-live="polite">${t.months[month]} ${year}</span>
+          
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <select class="header-select month-select" data-panel="${isSecondMonth ? 'second' : 'first'}">
+              ${t.months.map((m, idx) => `<option value="${idx}" ${idx === month ? 'selected' : ''}>${m}</option>`).join('')}
+            </select>
+            <select class="header-select year-select" data-panel="${isSecondMonth ? 'second' : 'first'}">
+              ${yearOptions.map(y => `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`).join('')}
+            </select>
+          </div>
+
           ${(isSecondMonth || this.state.viewMonths === 1) ? `<button type="button" class="nav-btn btn-next" aria-label="Next month">▶</button>` : '<div></div>'}
         </div>
 
@@ -529,10 +540,20 @@ class NexusDatePicker extends HTMLElement {
           justify-content: space-between;
         }
 
-        .month-title {
-          font-size: 15px;
-          font-weight: 700;
+        .header-select {
+          background: rgba(30, 41, 59, 0.8);
+          border: 1px solid var(--border-color);
           color: var(--text-main);
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 600;
+          outline: none;
+          cursor: pointer;
+        }
+
+        .header-select:focus {
+          border-color: var(--accent-purple);
         }
 
         .nav-btn {
@@ -712,6 +733,22 @@ class NexusDatePicker extends HTMLElement {
 
     this.shadowRoot.querySelector('.btn-prev')?.addEventListener('click', () => this.prevMonth());
     this.shadowRoot.querySelector('.btn-next')?.addEventListener('click', () => this.nextMonth());
+
+    this.shadowRoot.querySelectorAll('.month-select').forEach(sel => {
+      sel.addEventListener('change', (e) => {
+        const selectedMonth = parseInt(e.target.value);
+        this.state.month = selectedMonth;
+        this.render();
+      });
+    });
+
+    this.shadowRoot.querySelectorAll('.year-select').forEach(sel => {
+      sel.addEventListener('change', (e) => {
+        const selectedYear = parseInt(e.target.value);
+        this.state.year = selectedYear;
+        this.render();
+      });
+    });
 
     if (enableTime) {
       const timeInput = this.shadowRoot.querySelector('.time-input');
