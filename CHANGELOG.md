@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-07-28
+
+### Added
+- Integrated **Date Picker Preset Customization API & Dynamic Ranges Engine** in `datePickerService.js` and `public/nexus-date-picker.js`.
+- Added custom preset JSON string parser (`parseCustomPresets`).
+- Updated `<nexus-date-picker>` with attribute `custom-presets`, rendering an enterprise **Custom Rules** preset section in the sidebar with dynamic preset options (`Q3 Fiscal Peak`, `Q4 Holiday Rush`, `Summer Sprint 1`).
+- Added Enterprise Custom Presets JSON dropdown selector in live controls configurator in `public/index.html`.
+- Added unit tests in `datePickerService.spec.js` (24 total unit tests passing).
+
 ## [1.3.0] - 2026-07-28
 
 ### Added

@@ -51,6 +51,7 @@
               enable-events="true"
               enable-export="true"
               enable-touch="true"
+              custom-presets='[{"label":"Q3 Fiscal Peak","rangeStart":"2026-07-01","rangeEnd":"2026-09-30"},{"label":"Q4 Holiday Rush","rangeStart":"2026-11-15","rangeEnd":"2026-12-31"}]'
               name="bookingDates"
               required="true"
             ></nexus-date-picker>
@@ -196,9 +197,14 @@
           </label>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div class="control-group">
-            <label class="control-label">Minimum Date (min-date)</label>
+        <div class="control-group">
+          <label class="control-label">⚙️ Enterprise Custom Presets JSON (custom-presets)</label>
+          <select id="customPresetsSelect" class="control-input">
+            <option value="">None (Default Presets)</option>
+            <option value='[{"label":"Q3 Fiscal Peak","rangeStart":"2026-07-01","rangeEnd":"2026-09-30"},{"label":"Q4 Holiday Rush","rangeStart":"2026-11-15","rangeEnd":"2026-12-31"}]' selected>Enterprise Fiscal Peaks (Q3 / Q4)</option>
+            <option value='[{"label":"Summer Sprint 1","rangeStart":"2026-07-05","rangeEnd":"2026-07-19"},{"label":"Summer Sprint 2","rangeStart":"2026-07-20","rangeEnd":"2026-08-03"}]'>Sprint Milestones (Sprint 1 / 2)</option>
+          </select>
+        </div>
             <input type="date" id="minDateInput" class="form-input">
           </div>
           <div class="control-group">
@@ -289,6 +295,9 @@
 
       const enableTouchCheckbox = document.getElementById('enableTouchCheckbox');
       enableTouchCheckbox?.addEventListener('change', (e) => picker?.setAttribute('enable-touch', e.target.checked ? 'true' : 'false'));
+
+      const customPresetsSelect = document.getElementById('customPresetsSelect');
+      customPresetsSelect?.addEventListener('change', (e) => picker?.setAttribute('custom-presets', e.target.value));
 
       // Form submit listener
       const demoForm = document.getElementById('demoForm');

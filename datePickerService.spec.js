@@ -16,6 +16,7 @@ import {
   generateIcsFile,
   generateGoogleCalendarUrl,
   handleTouchRangeSelection,
+  parseCustomPresets,
   validateFormAssociation,
   formatDate,
   formatDateTime,
@@ -33,6 +34,21 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('safely parses custom preset JSON array strings for enterprise rules engine', () => {
+    const customJson = JSON.stringify([
+      { label: 'Q3 Financial Review', key: 'q3_review', rangeStart: '2026-07-01', rangeEnd: '2026-09-30' },
+      { label: 'Annual Holiday Peak', key: 'annual_peak', rangeStart: '2026-12-15', rangeEnd: '2026-12-31' }
+    ]);
+
+    const parsed = parseCustomPresets(customJson);
+    expect(parsed.length).toBe(2);
+    expect(parsed[0].label).toBe('Q3 Financial Review');
+    expect(parsed[1].rangeEnd).toBe('2026-12-31');
+
+    expect(parseCustomPresets('invalid json')).toEqual([]);
+    expect(parseCustomPresets('')).toEqual([]);
   });
 
   it('calculates touch range selections for mobile drag gestures', () => {

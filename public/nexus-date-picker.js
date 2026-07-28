@@ -12,6 +12,7 @@ import {
   generateIcsFile,
   generateGoogleCalendarUrl,
   handleTouchRangeSelection,
+  parseCustomPresets,
   getNextMonth,
   getSampleEvents,
   getLocaleTranslations,
@@ -29,7 +30,7 @@ class NexusDatePicker extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['mode', 'format', 'theme', 'locale', 'first-day-of-week', 'enable-time', 'enable-events', 'enable-export', 'enable-touch', 'view-months', 'name', 'required', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
+    return ['mode', 'format', 'theme', 'locale', 'first-day-of-week', 'enable-time', 'enable-events', 'enable-export', 'enable-touch', 'custom-presets', 'view-months', 'name', 'required', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
   }
 
   constructor() {
@@ -55,6 +56,7 @@ class NexusDatePicker extends HTMLElement {
       enableEvents: this.getAttribute('enable-events') === 'true',
       enableExport: this.getAttribute('enable-export') === 'true',
       enableTouch: this.getAttribute('enable-touch') === 'true',
+      customPresets: parseCustomPresets(this.getAttribute('custom-presets')),
       viewMonths: parseInt(this.getAttribute('view-months') || '1'),
       name: this.getAttribute('name') || 'datePicker',
       required: this.getAttribute('required') === 'true',
@@ -96,6 +98,7 @@ class NexusDatePicker extends HTMLElement {
     if (name === 'enable-events') this.state.enableEvents = newValue === 'true';
     if (name === 'enable-export') this.state.enableExport = newValue === 'true';
     if (name === 'enable-touch') this.state.enableTouch = newValue === 'true';
+    if (name === 'custom-presets') this.state.customPresets = parseCustomPresets(newValue);
     if (name === 'view-months') this.state.viewMonths = parseInt(newValue || '1');
     if (name === 'name') this.state.name = newValue || 'datePicker';
     if (name === 'required') this.state.required = newValue === 'true';
@@ -326,14 +329,14 @@ class NexusDatePicker extends HTMLElement {
 
   applyPreset(preset) {
     this.state.rangeStart = preset.rangeStart;
-    this.state.rangeEnd = preset.rangeEnd;
+    this.state.rangeEnd = preset.rangeEnd || preset.rangeStart;
     this.state.mode = 'range';
     if (!this.state.enableExport) {
       this.state.isOpen = false;
     }
 
     const startFmt = formatDate(preset.rangeStart, this.state.format);
-    const endFmt = formatDate(preset.rangeEnd, this.state.format);
+    const endFmt = formatDate(preset.rangeEnd || preset.rangeStart, this.state.format);
 
     this.updateFormValue();
     this.dispatchAnalytics('preset');
@@ -342,9 +345,9 @@ class NexusDatePicker extends HTMLElement {
       bubbles: true,
       composed: true,
       detail: {
-        preset: preset.key,
+        preset: preset.key || preset.label,
         rangeStart: preset.rangeStart,
-        rangeEnd: preset.rangeEnd,
+        rangeEnd: preset.rangeEnd || preset.rangeStart,
         formatted: `${startFmt} - ${endFmt}`
       }
     }));
@@ -447,6 +450,7 @@ class NexusDatePicker extends HTMLElement {
       enableEvents,
       enableExport,
       enableTouch,
+      customPresets,
       viewMonths,
       name,
       required,
@@ -492,7 +496,7 @@ class NexusDatePicker extends HTMLElement {
 
     const pastPresets = getPresetRanges();
     const relativePresets = getRelativePresets();
-    const allPresets = [...pastPresets, ...relativePresets];
+    const allPresets = [...pastPresets, ...relativePresets, ...customPresets];
     const submitVal = this.getSubmitValue();
 
     this.shadowRoot.innerHTML = `
@@ -800,6 +804,13 @@ class NexusDatePicker extends HTMLElement {
               ${relativePresets.map(p => `
                 <button type="button" class="preset-btn" data-preset="${p.key}" role="menuitem">${p.label}</button>
               `).join('')}
+
+              ${customPresets.length > 0 ? `
+                <span class="preset-section-header">Custom Rules</span>
+                ${customPresets.map((p, idx) => `
+                  <button type="button" class="preset-btn" data-preset="custom_${idx}" role="menuitem">${p.label}</button>
+                `).join('')}
+              ` : ''}
             </div>
           ` : ''}
 
@@ -918,7 +929,13 @@ class NexusDatePicker extends HTMLElement {
     this.shadowRoot.querySelectorAll('.preset-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const key = e.currentTarget.getAttribute('data-preset');
-        const preset = allPresets.find(p => p.key === key);
+        let preset;
+        if (key.startsWith('custom_')) {
+          const idx = parseInt(key.replace('custom_', ''));
+          preset = customPresets[idx];
+        } else {
+          preset = allPresets.find(p => p.key === key);
+        }
         if (preset) this.applyPreset(preset);
       });
     });

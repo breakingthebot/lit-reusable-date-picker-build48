@@ -25,6 +25,22 @@
  */
 
 /**
+ * Safely parses custom preset JSON array string for enterprise rule injection.
+ * @param {string} jsonString 
+ * @returns {Array<{ label: string, key: string, rangeStart: string, rangeEnd: string }>}
+ */
+export function parseCustomPresets(jsonString) {
+  if (!jsonString || typeof jsonString !== 'string') return [];
+  try {
+    const parsed = JSON.parse(jsonString);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(item => item && typeof item.label === 'string' && typeof item.rangeStart === 'string');
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Calculates start and end range dates when user performs touch drag gestures over grid cells.
  * @param {string} touchStartDate 
  * @param {string} touchCurrentDate 

@@ -2,8 +2,8 @@
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Demo-000000?style=for-the-badge&logo=vercel)](https://lit-reusable-date-picker-build48.vercel.app)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/breakingthebot/lit-reusable-date-picker-build48)
-[![Tests](https://img.shields.io/badge/Vitest-23%20Passed-6E9F18?style=for-the-badge&logo=vitest)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/datePickerService.spec.js)
-[![Version](https://img.shields.io/badge/Release-v1.3.0-blue?style=for-the-badge)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/Vitest-24%20Passed-6E9F18?style=for-the-badge&logo=vitest)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/datePickerService.spec.js)
+[![Version](https://img.shields.io/badge/Release-v1.4.0-blue?style=for-the-badge)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/CHANGELOG.md)
 
 ---
 
@@ -20,6 +20,7 @@
 ## 🔥 Key Features
 
 - **🧩 Framework-Agnostic Web Component**: Encapsulated Shadow DOM element (`<nexus-date-picker>`) compatible with React, Vue, Angular, Svelte, and Vanilla JS.
+- **⚙️ Enterprise Preset Customization API**: Dynamic JSON injection (`custom-presets='[{"label":"Q3 Peak","rangeStart":"..."}]'`) for enterprise calendar rules.
 - **📱 Touch Gesture & Mobile Drag Range Engine**: Intuitive touch-swipe and drag-to-select range gestures optimized for mobile viewports.
 - **📥 Calendar Event Export Syncer (.ics / Google Calendar)**: One-click export selected date range to `.ics` file download or Google Calendar event URL.
 - **📊 Real-Time Interactivity Funnel Analytics**: Dispatched `date-picker-analytics` events logging modal opens, date selections, and preset clicks.
