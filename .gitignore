@@ -17,3 +17,5 @@ build/
 AGENTS.md
 BUILD_NOTES.md
 BUILD_NOTES*.md
+
+.vercel

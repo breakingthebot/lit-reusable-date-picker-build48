@@ -11,7 +11,8 @@ import {
   generateCalendarGrid,
   getPresetRanges,
   validateDateRange,
-  getFrameworkSnippet
+  getFrameworkSnippet,
+  getKeyboardNavigationDate
 } from './datePickerService.js';
 
 describe('datePickerService', () => {
@@ -19,6 +20,18 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('calculates keyboard arrow key navigation target dates', () => {
+    const base = '2026-07-15';
+    expect(getKeyboardNavigationDate(base, 'ArrowLeft')).toBe('2026-07-14');
+    expect(getKeyboardNavigationDate(base, 'ArrowRight')).toBe('2026-07-16');
+    expect(getKeyboardNavigationDate(base, 'ArrowUp')).toBe('2026-07-08');
+    expect(getKeyboardNavigationDate(base, 'ArrowDown')).toBe('2026-07-22');
+    expect(getKeyboardNavigationDate(base, 'Home')).toBe('2026-07-01');
+    expect(getKeyboardNavigationDate(base, 'End')).toBe('2026-07-31');
+    expect(getKeyboardNavigationDate(base, 'PageUp')).toBe('2026-06-15');
+    expect(getKeyboardNavigationDate(base, 'PageDown')).toBe('2026-08-15');
   });
 
   it('determines the 1st day of week index correctly', () => {

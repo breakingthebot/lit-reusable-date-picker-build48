@@ -36,6 +36,48 @@ export function getFirstDayOfWeek(year, month) {
 }
 
 /**
+ * Calculates target date string when navigating grid with keyboard keys.
+ * @param {string} currentDateStr - ISO YYYY-MM-DD
+ * @param {'ArrowLeft'|'ArrowRight'|'ArrowUp'|'ArrowDown'|'Home'|'End'|'PageUp'|'PageDown'} key 
+ * @returns {string}
+ */
+export function getKeyboardNavigationDate(currentDateStr, key) {
+  const baseDate = currentDateStr ? new Date(currentDateStr + 'T00:00:00') : new Date();
+  if (isNaN(baseDate.getTime())) return formatDate(new Date(), 'YYYY-MM-DD');
+
+  const target = new Date(baseDate);
+
+  switch (key) {
+    case 'ArrowLeft':
+      target.setDate(baseDate.getDate() - 1);
+      break;
+    case 'ArrowRight':
+      target.setDate(baseDate.getDate() + 1);
+      break;
+    case 'ArrowUp':
+      target.setDate(baseDate.getDate() - 7);
+      break;
+    case 'ArrowDown':
+      target.setDate(baseDate.getDate() + 7);
+      break;
+    case 'Home':
+      target.setDate(1);
+      break;
+    case 'End':
+      target.setDate(getDaysInMonth(baseDate.getFullYear(), baseDate.getMonth()));
+      break;
+    case 'PageUp':
+      target.setMonth(baseDate.getMonth() - 1);
+      break;
+    case 'PageDown':
+      target.setMonth(baseDate.getMonth() + 1);
+      break;
+  }
+
+  return formatDate(target, 'YYYY-MM-DD');
+}
+
+/**
  * Formats Date object into target string pattern.
  * @param {Date|string} date 
  * @param {'YYYY-MM-DD'|'MM/DD/YYYY'|'DD/MM/YYYY'|'MMM DD, YYYY'} format 

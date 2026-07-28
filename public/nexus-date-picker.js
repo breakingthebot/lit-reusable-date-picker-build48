@@ -6,7 +6,8 @@ import {
   generateCalendarGrid,
   getPresetRanges,
   formatDate,
-  validateDateRange
+  validateDateRange,
+  getKeyboardNavigationDate
 } from '/datePickerService.js';
 
 class NexusDatePicker extends HTMLElement {
@@ -30,12 +31,13 @@ class NexusDatePicker extends HTMLElement {
       value: this.getAttribute('value') || '',
       rangeStart: this.getAttribute('range-start') || '',
       rangeEnd: this.getAttribute('range-end') || '',
-      isOpen: false,
-      hoverDate: ''
+      focusedDate: formatDate(now, 'YYYY-MM-DD'),
+      isOpen: false
     };
 
     this.render = this.render.bind(this);
     this.handleDocumentClick = this.handleDocumentClick.bind(this);
+    this.handleKeydown = this.handleKeydown.bind(this);
   }
 
   connectedCallback() {
@@ -71,6 +73,49 @@ class NexusDatePicker extends HTMLElement {
     }
   }
 
+  handleKeydown(e) {
+    if (!this.state.isOpen) {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        this.state.isOpen = true;
+        this.render();
+      }
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      this.state.isOpen = false;
+      this.render();
+      this.shadowRoot.querySelector('.picker-trigger')?.focus();
+      return;
+    }
+
+    const navKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'];
+    if (navKeys.includes(e.key)) {
+      e.preventDefault();
+      const nextDateStr = getKeyboardNavigationDate(this.state.focusedDate, e.key);
+      this.state.focusedDate = nextDateStr;
+
+      const d = new Date(nextDateStr + 'T00:00:00');
+      this.state.year = d.getFullYear();
+      this.state.month = d.getMonth();
+
+      this.render();
+
+      setTimeout(() => {
+        const btn = this.shadowRoot.querySelector(`[data-date="${nextDateStr}"]`);
+        btn?.focus();
+      }, 0);
+      return;
+    }
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this.selectDay(this.state.focusedDate);
+    }
+  }
+
   togglePicker() {
     this.state.isOpen = !this.state.isOpen;
     this.render();
@@ -97,6 +142,8 @@ class NexusDatePicker extends HTMLElement {
   }
 
   selectDay(dateStr) {
+    this.state.focusedDate = dateStr;
+
     if (this.state.mode === 'single') {
       this.state.value = dateStr;
       this.state.isOpen = false;
@@ -184,6 +231,7 @@ class NexusDatePicker extends HTMLElement {
       value,
       rangeStart,
       rangeEnd,
+      focusedDate,
       isOpen
     } = this.state;
 
@@ -212,7 +260,6 @@ class NexusDatePicker extends HTMLElement {
           --text-muted: ${theme === 'dark' ? '#94a3b8' : '#64748b'};
           --border-color: ${theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)'};
           --accent-purple: #8b5cf6;
-          --accent-purple-hover: #7c3aed;
           --range-bg: rgba(139, 92, 246, 0.2);
           position: relative;
         }
@@ -235,8 +282,9 @@ class NexusDatePicker extends HTMLElement {
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .picker-trigger:hover {
-          border-color: var(--accent-purple);
+        .picker-trigger:focus-visible {
+          outline: 2px solid var(--accent-purple);
+          outline-offset: 2px;
         }
 
         .calendar-dropdown {
@@ -275,9 +323,10 @@ class NexusDatePicker extends HTMLElement {
           transition: all 0.2s ease;
         }
 
-        .preset-btn:hover {
+        .preset-btn:hover, .preset-btn:focus-visible {
           background: rgba(139, 92, 246, 0.15);
           color: var(--accent-purple);
+          outline: none;
         }
 
         .calendar-main {
@@ -313,9 +362,10 @@ class NexusDatePicker extends HTMLElement {
           font-size: 12px;
         }
 
-        .nav-btn:hover {
+        .nav-btn:hover, .nav-btn:focus-visible {
           background: rgba(139, 92, 246, 0.2);
           border-color: var(--accent-purple);
+          outline: none;
         }
 
         .weekdays-row {
@@ -342,9 +392,10 @@ class NexusDatePicker extends HTMLElement {
           border-radius: 8px;
           cursor: pointer;
           color: var(--text-main);
-          border: none;
+          border: 1px solid transparent;
           background: transparent;
           transition: all 0.15s ease;
+          outline: none;
         }
 
         .day-cell.other-month {
@@ -352,9 +403,10 @@ class NexusDatePicker extends HTMLElement {
           opacity: 0.4;
         }
 
-        .day-cell:hover:not(.disabled) {
+        .day-cell:hover:not(.disabled), .day-cell:focus-visible:not(.disabled) {
           background: rgba(139, 92, 246, 0.25);
           color: #ffffff;
+          border-color: var(--accent-purple);
         }
 
         .day-cell.today {
@@ -379,36 +431,46 @@ class NexusDatePicker extends HTMLElement {
         }
       </style>
 
-      <button type="button" class="picker-trigger">
+      <button type="button" class="picker-trigger" aria-haspopup="dialog" aria-expanded="${isOpen}">
         <span>📅 ${this.getInputValueText()}</span>
         <span>▼</span>
       </button>
 
-      <div class="calendar-dropdown">
+      <div class="calendar-dropdown" role="dialog" aria-label="Calendar date picker">
         ${mode === 'range' ? `
-          <div class="presets-sidebar">
+          <div class="presets-sidebar" role="menu" aria-label="Quick date presets">
             <strong style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Presets</strong>
             ${presets.map(p => `
-              <button type="button" class="preset-btn" data-preset="${p.key}">${p.label}</button>
+              <button type="button" class="preset-btn" data-preset="${p.key}" role="menuitem">${p.label}</button>
             `).join('')}
           </div>
         ` : ''}
 
         <div class="calendar-main">
           <div class="header-nav">
-            <button type="button" class="nav-btn btn-prev">◀</button>
-            <span class="month-title">${monthNames[month]} ${year}</span>
-            <button type="button" class="nav-btn btn-next">▶</button>
+            <button type="button" class="nav-btn btn-prev" aria-label="Previous month">◀</button>
+            <span class="month-title" aria-live="polite">${monthNames[month]} ${year}</span>
+            <button type="button" class="nav-btn btn-next" aria-label="Next month">▶</button>
           </div>
 
-          <div class="weekdays-row">
-            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+          <div class="weekdays-row" role="row">
+            <span role="columnheader" aria-label="Sunday">Su</span>
+            <span role="columnheader" aria-label="Monday">Mo</span>
+            <span role="columnheader" aria-label="Tuesday">Tu</span>
+            <span role="columnheader" aria-label="Wednesday">We</span>
+            <span role="columnheader" aria-label="Thursday">Th</span>
+            <span role="columnheader" aria-label="Friday">Fr</span>
+            <span role="columnheader" aria-label="Saturday">Sa</span>
           </div>
 
-          <div class="days-grid">
+          <div class="days-grid" role="grid" aria-label="${monthNames[month]} ${year} grid">
             ${grid.map(day => `
               <button 
                 type="button" 
+                role="gridcell"
+                tabindex="${day.dateStr === focusedDate ? '0' : '-1'}"
+                aria-selected="${day.isSelected || day.isRangeStart || day.isRangeEnd}"
+                aria-disabled="${day.isDisabled}"
                 class="day-cell 
                   ${!day.isCurrentMonth ? 'other-month' : ''} 
                   ${day.isToday ? 'today' : ''} 
@@ -429,7 +491,13 @@ class NexusDatePicker extends HTMLElement {
     `;
 
     // Attach event listeners
-    this.shadowRoot.querySelector('.picker-trigger').addEventListener('click', () => this.togglePicker());
+    const triggerBtn = this.shadowRoot.querySelector('.picker-trigger');
+    const dropdownEl = this.shadowRoot.querySelector('.calendar-dropdown');
+
+    triggerBtn.addEventListener('click', () => this.togglePicker());
+    triggerBtn.addEventListener('keydown', this.handleKeydown);
+    dropdownEl.addEventListener('keydown', this.handleKeydown);
+
     this.shadowRoot.querySelector('.btn-prev').addEventListener('click', () => this.prevMonth());
     this.shadowRoot.querySelector('.btn-next').addEventListener('click', () => this.nextMonth());
 
