@@ -189,9 +189,11 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { getFrameworkSnippet } from '/datePickerService.js';
+
     document.addEventListener('DOMContentLoaded', () => {
-      const picker = document.getElementById('demoPicker');
+      const picker = document.getElementById('mainPicker') || document.getElementById('demoPicker');
       const eventOutput = document.getElementById('eventOutput');
       const modeSelect = document.getElementById('modeSelect');
       const formatSelect = document.getElementById('formatSelect');
@@ -206,34 +208,39 @@
       let currentFramework = 'react';
 
       // 1. Handle Dispatched Component Events
-      picker.addEventListener('date-select', (e) => {
-        eventOutput.innerHTML = `<strong>date-select:</strong> <code>${JSON.stringify(e.detail)}</code>`;
-      });
+      if (picker) {
+        picker.addEventListener('date-select', (e) => {
+          eventOutput.innerHTML = `<strong>date-select:</strong> <code>${JSON.stringify(e.detail)}</code>`;
+        });
 
-      picker.addEventListener('range-select', (e) => {
-        eventOutput.innerHTML = `<strong>range-select:</strong> <code>${JSON.stringify(e.detail)}</code>`;
-      });
+        picker.addEventListener('range-select', (e) => {
+          eventOutput.innerHTML = `<strong>range-select:</strong> <code>${JSON.stringify(e.detail)}</code>`;
+        });
+      }
 
       // 2. Control Input Watchers
-      modeSelect.addEventListener('change', (e) => picker.setAttribute('mode', e.target.value));
-      formatSelect.addEventListener('change', (e) => picker.setAttribute('format', e.target.value));
-      themeSelect.addEventListener('change', (e) => picker.setAttribute('theme', e.target.value));
+      modeSelect?.addEventListener('change', (e) => {
+        picker?.setAttribute('mode', e.target.value);
+        loadSnippet(currentFramework);
+      });
+      formatSelect?.addEventListener('change', (e) => picker?.setAttribute('format', e.target.value));
+      themeSelect?.addEventListener('change', (e) => picker?.setAttribute('theme', e.target.value));
+
       const viewMonthsSelect = document.getElementById('viewMonthsSelect');
-      picker.setAttribute('view-months', '2');
-      viewMonthsSelect.addEventListener('change', (e) => picker.setAttribute('view-months', e.target.value));
+      viewMonthsSelect?.addEventListener('change', (e) => picker?.setAttribute('view-months', e.target.value));
 
       const localeSelect = document.getElementById('localeSelect');
-      localeSelect.addEventListener('change', (e) => picker.setAttribute('locale', e.target.value));
+      localeSelect?.addEventListener('change', (e) => picker?.setAttribute('locale', e.target.value));
 
       const firstDaySelect = document.getElementById('firstDaySelect');
-      firstDaySelect.addEventListener('change', (e) => picker.setAttribute('first-day-of-week', e.target.value));
+      firstDaySelect?.addEventListener('change', (e) => picker?.setAttribute('first-day-of-week', e.target.value));
+
       const enableTimeCheckbox = document.getElementById('enableTimeCheckbox');
-      picker.setAttribute('enable-time', 'true');
-      enableTimeCheckbox.addEventListener('change', (e) => picker.setAttribute('enable-time', e.target.checked ? 'true' : 'false'));
+      enableTimeCheckbox?.addEventListener('change', (e) => picker?.setAttribute('enable-time', e.target.checked ? 'true' : 'false'));
 
       const enableEventsCheckbox = document.getElementById('enableEventsCheckbox');
-      picker.setAttribute('enable-events', 'true');
-      enableEventsCheckbox.addEventListener('change', (e) => picker.setAttribute('enable-events', e.target.checked ? 'true' : 'false'));
+      enableEventsCheckbox?.addEventListener('change', (e) => picker?.setAttribute('enable-events', e.target.checked ? 'true' : 'false'));
+
       // Form submit listener
       const demoForm = document.getElementById('demoForm');
       const formSubmitStatus = document.getElementById('formSubmitStatus');
@@ -244,14 +251,23 @@
         formSubmitStatus.textContent = `Form submitted! Data: [bookingDates=${submitVal}]`;
       });
 
-      // 3. Load Snippet API
+      // 3. Load Snippet API (Client-side ESM module fallback)
       function loadSnippet(framework) {
         currentFramework = framework;
-        const mode = modeSelect.value;
+        const mode = modeSelect ? modeSelect.value : 'single';
+
+        // Try API first, fallback to client-side domain engine
         fetch(`/api/snippets?framework=${framework}&mode=${mode}`)
           .then(res => res.json())
           .then(data => {
-            codeDisplay.textContent = data.snippet;
+            if (data && data.snippet) {
+              codeDisplay.textContent = data.snippet;
+            } else {
+              codeDisplay.textContent = getFrameworkSnippet(framework, mode);
+            }
+          })
+          .catch(() => {
+            codeDisplay.textContent = getFrameworkSnippet(framework, mode);
           });
       }
 
@@ -264,7 +280,7 @@
         });
       });
 
-      btnCopyCode.addEventListener('click', () => {
+      btnCopyCode?.addEventListener('click', () => {
         navigator.clipboard.writeText(codeDisplay.textContent);
         btnCopyCode.textContent = '✅ Copied!';
         setTimeout(() => btnCopyCode.textContent = '📋 Copy Snippet', 2000);
