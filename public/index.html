@@ -31,21 +31,38 @@
 
     <!-- Main Playground Grid -->
     <div class="playground-grid">
-      <!-- Live Web Component Interactive Preview -->
-      <div class="card-glass">
-        <h2 class="card-title">🧪 Live Web Component Demo</h2>
-        <p class="card-desc">Interact with the custom element below. Expand calendar, select single dates or preset ranges.</p>
-
-        <div style="display: flex; justify-content: center; padding: 40px 0; min-height: 220px;">
-          <nexus-date-picker 
-            id="demoPicker" 
-            mode="range" 
-            format="YYYY-MM-DD" 
-            theme="dark"
-          ></nexus-date-picker>
+      <!-- Live Web Component Demo Container -->
+      <div class="card card-glow">
+        <div class="card-header">
+          <h2>⚡ Live Web Component Sandbox</h2>
+          <span class="badge badge-purple">Lit 3.x Shadow DOM Element</span>
         </div>
 
-        <div class="output-banner">
+        <form id="demoForm" style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Custom Lit Date Picker Web Component -->
+          <div>
+            <nexus-date-picker 
+              id="mainPicker" 
+              mode="range" 
+              format="YYYY-MM-DD" 
+              theme="dark"
+              view-months="2"
+              enable-time="true"
+              enable-events="true"
+              name="bookingDates"
+              required="true"
+            ></nexus-date-picker>
+          </div>
+
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button type="submit" class="btn btn-purple" style="padding: 10px 20px; font-size: 13px; font-weight: 600; cursor: pointer;">
+              🚀 Submit Native HTML Form
+            </button>
+            <span id="formSubmitStatus" style="font-size: 13px; color: #10b981; font-weight: 500;"></span>
+          </div>
+        </form>
+
+        <div class="output-banner" style="margin-top: 16px;">
           <strong>📢 Dispatched Custom Event Log:</strong>
           <div id="eventOutput" style="margin-top: 6px; font-family: monospace;">
             <em>Waiting for date selection...</em>
@@ -215,8 +232,15 @@
       const enableEventsCheckbox = document.getElementById('enableEventsCheckbox');
       picker.setAttribute('enable-events', 'true');
       enableEventsCheckbox.addEventListener('change', (e) => picker.setAttribute('enable-events', e.target.checked ? 'true' : 'false'));
-      minDateInput.addEventListener('change', (e) => picker.setAttribute('min-date', e.target.value));
-      maxDateInput.addEventListener('change', (e) => picker.setAttribute('max-date', e.target.value));
+      // Form submit listener
+      const demoForm = document.getElementById('demoForm');
+      const formSubmitStatus = document.getElementById('formSubmitStatus');
+      demoForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(demoForm);
+        const submitVal = formData.get('bookingDates');
+        formSubmitStatus.textContent = `Form submitted! Data: [bookingDates=${submitVal}]`;
+      });
 
       // 3. Load Snippet API
       function loadSnippet(framework) {

@@ -8,6 +8,7 @@ import {
   getNextMonth,
   getSampleEvents,
   getLocaleTranslations,
+  validateFormAssociation,
   formatDate,
   formatDateTime,
   validateTime,
@@ -16,13 +17,20 @@ import {
 } from '/datePickerService.js';
 
 class NexusDatePicker extends HTMLElement {
+  static get formAssociated() {
+    return true;
+  }
+
   static get observedAttributes() {
-    return ['mode', 'format', 'theme', 'locale', 'first-day-of-week', 'enable-time', 'enable-events', 'view-months', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
+    return ['mode', 'format', 'theme', 'locale', 'first-day-of-week', 'enable-time', 'enable-events', 'view-months', 'name', 'required', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
   }
 
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    if ('attachInternals' in this) {
+      this.internals = this.attachInternals();
+    }
 
     const now = new Date();
     this.state = {
@@ -36,6 +44,8 @@ class NexusDatePicker extends HTMLElement {
       enableTime: this.getAttribute('enable-time') === 'true',
       enableEvents: this.getAttribute('enable-events') === 'true',
       viewMonths: parseInt(this.getAttribute('view-months') || '1'),
+      name: this.getAttribute('name') || 'datePicker',
+      required: this.getAttribute('required') === 'true',
       time: '12:00',
       minDate: this.getAttribute('min-date') || '',
       maxDate: this.getAttribute('max-date') || '',
@@ -54,6 +64,7 @@ class NexusDatePicker extends HTMLElement {
 
   connectedCallback() {
     document.addEventListener('click', this.handleDocumentClick);
+    this.updateFormValue();
     this.render();
   }
 
@@ -72,13 +83,48 @@ class NexusDatePicker extends HTMLElement {
     if (name === 'enable-time') this.state.enableTime = newValue === 'true';
     if (name === 'enable-events') this.state.enableEvents = newValue === 'true';
     if (name === 'view-months') this.state.viewMonths = parseInt(newValue || '1');
+    if (name === 'name') this.state.name = newValue || 'datePicker';
+    if (name === 'required') this.state.required = newValue === 'true';
     if (name === 'min-date') this.state.minDate = newValue || '';
     if (name === 'max-date') this.state.maxDate = newValue || '';
     if (name === 'value') this.state.value = newValue || '';
     if (name === 'range-start') this.state.rangeStart = newValue || '';
     if (name === 'range-end') this.state.rangeEnd = newValue || '';
 
+    this.updateFormValue();
     this.render();
+  }
+
+  updateFormValue() {
+    const val = this.getSubmitValue();
+    if (this.internals && this.internals.setFormValue) {
+      this.internals.setFormValue(val);
+      const validation = validateFormAssociation(val, {
+        required: this.state.required,
+        minDate: this.state.minDate,
+        maxDate: this.state.maxDate
+      });
+
+      if (!validation.isValid) {
+        this.internals.setValidity({ valueMissing: true }, validation.validationMessage);
+      } else {
+        this.internals.setValidity({});
+      }
+    }
+  }
+
+  getSubmitValue() {
+    if (this.state.mode === 'single') {
+      if (!this.state.value) return '';
+      return this.state.enableTime 
+        ? `${this.state.value} ${this.state.time}` 
+        : this.state.value;
+    } else {
+      if (this.state.rangeStart && this.state.rangeEnd) {
+        return `${this.state.rangeStart} to ${this.state.rangeEnd}`;
+      }
+      return this.state.rangeStart || '';
+    }
   }
 
   handleDocumentClick(e) {
@@ -173,6 +219,8 @@ class NexusDatePicker extends HTMLElement {
         ? formatDateTime(dateStr, this.state.time, this.state.format)
         : formatDate(dateStr, this.state.format);
 
+      this.updateFormValue();
+
       this.dispatchEvent(new CustomEvent('date-select', {
         bubbles: true,
         composed: true,
@@ -200,6 +248,8 @@ class NexusDatePicker extends HTMLElement {
             ? formatDateTime(dateStr, this.state.time, this.state.format)
             : formatDate(dateStr, this.state.format);
 
+          this.updateFormValue();
+
           this.dispatchEvent(new CustomEvent('range-select', {
             bubbles: true,
             composed: true,
@@ -224,6 +274,8 @@ class NexusDatePicker extends HTMLElement {
 
     const startFmt = formatDate(preset.rangeStart, this.state.format);
     const endFmt = formatDate(preset.rangeEnd, this.state.format);
+
+    this.updateFormValue();
 
     this.dispatchEvent(new CustomEvent('range-select', {
       bubbles: true,
@@ -323,6 +375,8 @@ class NexusDatePicker extends HTMLElement {
       enableTime,
       enableEvents,
       viewMonths,
+      name,
+      required,
       time,
       minDate,
       maxDate,
@@ -361,6 +415,7 @@ class NexusDatePicker extends HTMLElement {
     }
 
     const presets = getPresetRanges();
+    const submitVal = this.getSubmitValue();
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -595,6 +650,9 @@ class NexusDatePicker extends HTMLElement {
         }
       </style>
 
+      <!-- Hidden Form Input Sync -->
+      <input type="hidden" name="${name}" value="${submitVal}" ${required ? 'required' : ''}>
+
       <button type="button" class="picker-trigger" aria-haspopup="dialog" aria-expanded="${isOpen}">
         <span>📅 ${this.getInputValueText()}</span>
         <span>▼</span>
@@ -640,6 +698,7 @@ class NexusDatePicker extends HTMLElement {
       const timeInput = this.shadowRoot.querySelector('.time-input');
       timeInput?.addEventListener('change', (e) => {
         this.state.time = e.target.value;
+        this.updateFormValue();
         this.render();
       });
     }

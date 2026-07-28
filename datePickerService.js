@@ -25,6 +25,33 @@
  */
 
 /**
+ * Validates form constraints for Form Associated Custom Element.
+ * @param {string} value 
+ * @param {Object} options 
+ * @param {boolean} [options.required=false] 
+ * @param {string} [options.minDate=''] 
+ * @param {string} [options.maxDate=''] 
+ * @returns {{ isValid: boolean, validationMessage: string }}
+ */
+export function validateFormAssociation(value, options = {}) {
+  const { required = false, minDate = '', maxDate = '' } = options;
+
+  if (required && (!value || !value.trim())) {
+    return { isValid: false, validationMessage: 'Please select a required date.' };
+  }
+
+  if (value && minDate && value < minDate) {
+    return { isValid: false, validationMessage: `Selected date cannot precede ${minDate}.` };
+  }
+
+  if (value && maxDate && value > maxDate) {
+    return { isValid: false, validationMessage: `Selected date cannot exceed ${maxDate}.` };
+  }
+
+  return { isValid: true, validationMessage: '' };
+}
+
+/**
  * Returns locale translation dictionaries for month names and weekdays.
  * @param {'en'|'es'|'fr'|'de'} locale 
  * @returns {{ months: string[], weekdays: string[] }}
@@ -387,19 +414,19 @@ export function getFrameworkSnippet(framework = 'react', mode = 'single') {
 
   switch (framework) {
     case 'react':
-      return `import React, { useRef, useEffect } from 'react';\nimport '@nexuscloud/date-picker';\n\nexport function DateFilter() {\n  const pickerRef = useRef(null);\n\n  useEffect(() => {\n    const el = pickerRef.current;\n    const handleSelect = (e) => console.log('Selected date:', e.detail);\n    el?.addEventListener('date-select', handleSelect);\n    return () => el?.removeEventListener('date-select', handleSelect);\n  }, []);\n\n  return (\n    <nexus-date-picker\n      ref={pickerRef}\n      ${modeAttr}\n      format="YYYY-MM-DD"\n      locale="es"\n      first-day-of-week="1"\n      theme="dark"\n    />\n  );\n}`;
+      return `import React, { useRef, useEffect } from 'react';\nimport '@nexuscloud/date-picker';\n\nexport function DateFilter() {\n  const pickerRef = useRef(null);\n\n  useEffect(() => {\n    const el = pickerRef.current;\n    const handleSelect = (e) => console.log('Selected date:', e.detail);\n    el?.addEventListener('date-select', handleSelect);\n    return () => el?.removeEventListener('date-select', handleSelect);\n  }, []);\n\n  return (\n    <form onSubmit={(e) => { e.preventDefault(); console.log('Form submitted'); }}>\n      <nexus-date-picker\n        ref={pickerRef}\n        ${modeAttr}\n        name="appointmentDate"\n        required="true"\n        format="YYYY-MM-DD"\n        theme="dark"\n      />\n      <button type="submit">Submit</button>\n    </form>\n  );\n}`;
 
     case 'vue':
-      return `<template>\n  <nexus-date-picker\n    ${modeAttr}\n    format="YYYY-MM-DD"\n    locale="es"\n    first-day-of-week="1"\n    theme="dark"\n    @date-select="onDateSelect"\n  />\n</template>\n\n<script setup>\nimport '@nexuscloud/date-picker';\n\nconst onDateSelect = (event) => {\n  console.log('Vue selected date:', event.detail);\n};\n</script>`;
+      return `<template>\n  <form @submit.prevent="submitForm">\n    <nexus-date-picker\n      ${modeAttr}\n      name="appointmentDate"\n      required="true"\n      format="YYYY-MM-DD"\n      theme="dark"\n      @date-select="onDateSelect"\n    />\n    <button type="submit">Submit</button>\n  </form>\n</template>\n\n<script setup>\nimport '@nexuscloud/date-picker';\n\nconst onDateSelect = (event) => {\n  console.log('Vue selected date:', event.detail);\n};\n</script>`;
 
     case 'angular':
-      return `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';\nimport '@nexuscloud/date-picker';\n\n@Component({\n  selector: 'app-date-filter',\n  schemas: [CUSTOM_ELEMENTS_SCHEMA],\n  template: \`\n    <nexus-date-picker \n      ${modeAttr} \n      locale="es"\n      first-day-of-week="1"\n      format="YYYY-MM-DD"\n      (date-select)="onDateSelect($event)">\n    </nexus-date-picker>\n  \`\n})\nexport class DateFilterComponent {\n  onDateSelect(event: CustomEvent) {\n    console.log('Angular date:', event.detail);\n  }\n}`;
+      return `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';\nimport '@nexuscloud/date-picker';\n\n@Component({\n  selector: 'app-date-filter',\n  schemas: [CUSTOM_ELEMENTS_SCHEMA],\n  template: \`\n    <form (ngSubmit)="onSubmit()">\n      <nexus-date-picker \n        ${modeAttr} \n        name="appointmentDate"\n        required="true"\n        format="YYYY-MM-DD"\n        (date-select)="onDateSelect($event)">\n      </nexus-date-picker>\n      <button type="submit">Submit</button>\n    </form>\n  \`\n})\nexport class DateFilterComponent {\n  onDateSelect(event: CustomEvent) {\n    console.log('Angular date:', event.detail);\n  }\n}`;
 
     case 'svelte':
-      return `<script>\n  import { onMount } from 'svelte';\n  import '@nexuscloud/date-picker';\n\n  let selectedDate = '';\n  function handleSelect(event) {\n    selectedDate = event.detail.value;\n  }\n</script>\n\n<nexus-date-picker ${modeAttr} locale="es" first-day-of-week="1" on:date-select={handleSelect} />\n<p>Selected: {selectedDate}</p>`;
+      return `<script>\n  import { onMount } from 'svelte';\n  import '@nexuscloud/date-picker';\n\n  let selectedDate = '';\n  function handleSelect(event) {\n    selectedDate = event.detail.value;\n  }\n</script>\n\n<nexus-date-picker ${modeAttr} name="appointmentDate" required="true" on:date-select={handleSelect} />\n<p>Selected: {selectedDate}</p>`;
 
     case 'vanilla':
     default:
-      return `<script type="module" src="https://cdn.nexuscloud.ai/components/nexus-date-picker.js"></script>\n\n<nexus-date-picker ${modeAttr} locale="es" first-day-of-week="1" format="YYYY-MM-DD" theme="dark"></nexus-date-picker>\n\n<script>\n  const picker = document.querySelector('nexus-date-picker');\n  picker.addEventListener('date-select', (e) => {\n    console.log('Selected date:', e.detail);\n  });\n</script>`;
+      return `<form id="myForm">\n  <nexus-date-picker ${modeAttr} name="appointmentDate" required="true" format="YYYY-MM-DD" theme="dark"></nexus-date-picker>\n  <button type="submit">Submit</button>\n</form>\n\n<script>\n  const form = document.getElementById('myForm');\n  form.addEventListener('submit', (e) => {\n    e.preventDefault();\n    const data = new FormData(form);\n    console.log('Submitted date:', data.get('appointmentDate'));\n  });\n</script>`;
   }
 }

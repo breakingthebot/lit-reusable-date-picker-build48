@@ -9,6 +9,7 @@ import {
   getNextMonth,
   getSampleEvents,
   getLocaleTranslations,
+  validateFormAssociation,
   formatDate,
   formatDateTime,
   validateTime,
@@ -25,6 +26,13 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('validates form association required and min/max date constraints', () => {
+    expect(validateFormAssociation('', { required: true }).isValid).toBe(false);
+    expect(validateFormAssociation('2026-07-28', { required: true }).isValid).toBe(true);
+    expect(validateFormAssociation('2026-07-01', { minDate: '2026-07-05' }).isValid).toBe(false);
+    expect(validateFormAssociation('2026-07-30', { maxDate: '2026-07-25' }).isValid).toBe(false);
   });
 
   it('retrieves multi-language locale translations (en, es, fr, de)', () => {
