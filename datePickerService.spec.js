@@ -7,6 +7,8 @@ import {
   getDaysInMonth,
   getFirstDayOfWeek,
   formatDate,
+  formatDateTime,
+  validateTime,
   parseDateToIso,
   generateCalendarGrid,
   getPresetRanges,
@@ -20,6 +22,19 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('combines date and time into formatted DateTime strings', () => {
+    expect(formatDateTime('2026-07-28', '14:30', 'YYYY-MM-DD')).toBe('2026-07-28 14:30');
+    expect(formatDateTime('2026-07-28', '09:15', 'MM/DD/YYYY')).toBe('07/28/2026 09:15');
+  });
+
+  it('validates HH:MM time strings format accurately', () => {
+    expect(validateTime('14:30')).toBe(true);
+    expect(validateTime('00:00')).toBe(true);
+    expect(validateTime('23:59')).toBe(true);
+    expect(validateTime('25:00')).toBe(false);
+    expect(validateTime('invalid')).toBe(false);
   });
 
   it('calculates keyboard arrow key navigation target dates', () => {

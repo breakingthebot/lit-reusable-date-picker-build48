@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-07-28
+
+### Added
+- Integrated **Date Picker Time Picker Extension (Date + Time HH:MM)** in `datePickerService.js` and `public/nexus-date-picker.js`.
+- Added DateTime formatting helper (`formatDateTime`) and time string format validator (`validateTime`).
+- Updated `<nexus-date-picker>` with attribute `enable-time="true|false"`, state `time` (`12:00`), bottom Time Picker Bar UI (`<input type="time" class="time-input">`), and combined DateTime custom event payload dispatches (`{ value, time, formatted }`).
+- Added Time Picker toggle checkbox in live controls configurator in `public/index.html`.
+- Added unit tests in `datePickerService.spec.js` (12 total unit tests passing).
+
 ## [0.2.0] - 2026-07-28
 
 ### Added

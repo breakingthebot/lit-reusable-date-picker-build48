@@ -2,8 +2,8 @@
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Demo-000000?style=for-the-badge&logo=vercel)](https://lit-reusable-date-picker-build48.vercel.app)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/breakingthebot/lit-reusable-date-picker-build48)
-[![Tests](https://img.shields.io/badge/Vitest-10%20Passed-6E9F18?style=for-the-badge&logo=vitest)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/datePickerService.spec.js)
-[![Version](https://img.shields.io/badge/Release-v0.2.0-blue?style=for-the-badge)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/Vitest-12%20Passed-6E9F18?style=for-the-badge&logo=vitest)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/datePickerService.spec.js)
+[![Version](https://img.shields.io/badge/Release-v0.3.0-blue?style=for-the-badge)](file:///C:/Users/marve/Desktop/AI-286-Builds/Build_48/CHANGELOG.md)
 
 ---
 
@@ -20,6 +20,7 @@
 ## 🔥 Key Features
 
 - **🧩 Framework-Agnostic Web Component**: Encapsulated Shadow DOM element (`<nexus-date-picker>`) compatible with React, Vue, Angular, Svelte, and Vanilla JS.
+- **⏰ Integrated Time Picker Extension (HH:MM)**: Combined Date & Time selection mode (`enable-time="true"`) with integrated time selector inputs and DateTime payload outputs.
 - **⌨️ Keyboard Navigation & WCAG 2.1 AA Accessibility**: Full arrow key date grid traversal (`ArrowLeft`/`ArrowRight`/`ArrowUp`/`ArrowDown`), `PageUp`/`PageDown` month jumps, `Home`/`End` month boundary jumps, and ARIA grid roles (`role="grid"`, `aria-selected`, `aria-disabled`).
 - **📅 Single & Range Selection Modes**: Supports single date selection as well as dual-click start/end date range picking with visual range highlights.
 - **⚡ Quick Preset Date Ranges**: One-click selection for *Today*, *Yesterday*, *Last 7 Days*, *Last 30 Days*, *This Month*, and *Last Month*.

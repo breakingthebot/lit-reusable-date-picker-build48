@@ -96,6 +96,13 @@
           </select>
         </div>
 
+        <div class="control-group">
+          <label class="control-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+            <input type="checkbox" id="enableTimeCheckbox" checked>
+            <span>⏰ Enable Combined Time Picker (enable-time="true")</span>
+          </label>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="control-group">
             <label class="control-label">Minimum Date (min-date)</label>
@@ -158,6 +165,9 @@
       modeSelect.addEventListener('change', (e) => picker.setAttribute('mode', e.target.value));
       formatSelect.addEventListener('change', (e) => picker.setAttribute('format', e.target.value));
       themeSelect.addEventListener('change', (e) => picker.setAttribute('theme', e.target.value));
+      const enableTimeCheckbox = document.getElementById('enableTimeCheckbox');
+      picker.setAttribute('enable-time', 'true');
+      enableTimeCheckbox.addEventListener('change', (e) => picker.setAttribute('enable-time', e.target.checked ? 'true' : 'false'));
       minDateInput.addEventListener('change', (e) => picker.setAttribute('min-date', e.target.value));
       maxDateInput.addEventListener('change', (e) => picker.setAttribute('max-date', e.target.value));
 

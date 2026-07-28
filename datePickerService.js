@@ -78,6 +78,31 @@ export function getKeyboardNavigationDate(currentDateStr, key) {
 }
 
 /**
+ * Combines date and time into target formatted DateTime string.
+ * @param {string} dateStr - YYYY-MM-DD
+ * @param {string} timeStr - HH:MM
+ * @param {'YYYY-MM-DD'|'MM/DD/YYYY'|'DD/MM/YYYY'|'MMM DD, YYYY'} format 
+ * @returns {string}
+ */
+export function formatDateTime(dateStr, timeStr = '12:00', format = 'YYYY-MM-DD') {
+  if (!dateStr) return '';
+  const dateFormatted = formatDate(dateStr, format);
+  const timeFormatted = validateTime(timeStr) ? timeStr : '12:00';
+  return `${dateFormatted} ${timeFormatted}`;
+}
+
+/**
+ * Validates HH:MM time string format.
+ * @param {string} timeStr 
+ * @returns {boolean}
+ */
+export function validateTime(timeStr) {
+  if (!timeStr || typeof timeStr !== 'string') return false;
+  const regex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+  return regex.test(timeStr.trim());
+}
+
+/**
  * Formats Date object into target string pattern.
  * @param {Date|string} date 
  * @param {'YYYY-MM-DD'|'MM/DD/YYYY'|'DD/MM/YYYY'|'MMM DD, YYYY'} format 
@@ -270,19 +295,19 @@ export function getFrameworkSnippet(framework = 'react', mode = 'single') {
 
   switch (framework) {
     case 'react':
-      return `import React, { useRef, useEffect } from 'react';\nimport '@nexuscloud/date-picker';\n\nexport function DateFilter() {\n  const pickerRef = useRef(null);\n\n  useEffect(() => {\n    const el = pickerRef.current;\n    const handleSelect = (e) => console.log('Selected date:', e.detail);\n    el?.addEventListener('date-select', handleSelect);\n    return () => el?.removeEventListener('date-select', handleSelect);\n  }, []);\n\n  return (\n    <nexus-date-picker\n      ref={pickerRef}\n      ${modeAttr}\n      format="YYYY-MM-DD"\n      theme="dark"\n    />\n  );\n}`;
+      return `import React, { useRef, useEffect } from 'react';\nimport '@nexuscloud/date-picker';\n\nexport function DateFilter() {\n  const pickerRef = useRef(null);\n\n  useEffect(() => {\n    const el = pickerRef.current;\n    const handleSelect = (e) => console.log('Selected date:', e.detail);\n    el?.addEventListener('date-select', handleSelect);\n    return () => el?.removeEventListener('date-select', handleSelect);\n  }, []);\n\n  return (\n    <nexus-date-picker\n      ref={pickerRef}\n      ${modeAttr}\n      format="YYYY-MM-DD"\n      enable-time="true"\n      theme="dark"\n    />\n  );\n}`;
 
     case 'vue':
-      return `<template>\n  <nexus-date-picker\n    ${modeAttr}\n    format="YYYY-MM-DD"\n    theme="dark"\n    @date-select="onDateSelect"\n  />\n</template>\n\n<script setup>\nimport '@nexuscloud/date-picker';\n\nconst onDateSelect = (event) => {\n  console.log('Vue selected date:', event.detail);\n};\n</script>`;
+      return `<template>\n  <nexus-date-picker\n    ${modeAttr}\n    format="YYYY-MM-DD"\n    enable-time="true"\n    theme="dark"\n    @date-select="onDateSelect"\n  />\n</template>\n\n<script setup>\nimport '@nexuscloud/date-picker';\n\nconst onDateSelect = (event) => {\n  console.log('Vue selected date:', event.detail);\n};\n</script>`;
 
     case 'angular':
-      return `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';\nimport '@nexuscloud/date-picker';\n\n@Component({\n  selector: 'app-date-filter',\n  schemas: [CUSTOM_ELEMENTS_SCHEMA],\n  template: \`\n    <nexus-date-picker \n      ${modeAttr} \n      format="YYYY-MM-DD"\n      (date-select)="onDateSelect($event)">\n    </nexus-date-picker>\n  \`\n})\nexport class DateFilterComponent {\n  onDateSelect(event: CustomEvent) {\n    console.log('Angular date:', event.detail);\n  }\n}`;
+      return `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';\nimport '@nexuscloud/date-picker';\n\n@Component({\n  selector: 'app-date-filter',\n  schemas: [CUSTOM_ELEMENTS_SCHEMA],\n  template: \`\n    <nexus-date-picker \n      ${modeAttr} \n      enable-time="true"\n      format="YYYY-MM-DD"\n      (date-select)="onDateSelect($event)">\n    </nexus-date-picker>\n  \`\n})\nexport class DateFilterComponent {\n  onDateSelect(event: CustomEvent) {\n    console.log('Angular date:', event.detail);\n  }\n}`;
 
     case 'svelte':
-      return `<script>\n  import { onMount } from 'svelte';\n  import '@nexuscloud/date-picker';\n\n  let selectedDate = '';\n  function handleSelect(event) {\n    selectedDate = event.detail.value;\n  }\n</script>\n\n<nexus-date-picker ${modeAttr} on:date-select={handleSelect} />\n<p>Selected: {selectedDate}</p>`;
+      return `<script>\n  import { onMount } from 'svelte';\n  import '@nexuscloud/date-picker';\n\n  let selectedDate = '';\n  function handleSelect(event) {\n    selectedDate = event.detail.value;\n  }\n</script>\n\n<nexus-date-picker ${modeAttr} enable-time="true" on:date-select={handleSelect} />\n<p>Selected: {selectedDate}</p>`;
 
     case 'vanilla':
     default:
-      return `<script type="module" src="https://cdn.nexuscloud.ai/components/nexus-date-picker.js"></script>\n\n<nexus-date-picker ${modeAttr} format="YYYY-MM-DD" theme="dark"></nexus-date-picker>\n\n<script>\n  const picker = document.querySelector('nexus-date-picker');\n  picker.addEventListener('date-select', (e) => {\n    console.log('Selected date:', e.detail);\n  });\n</script>`;
+      return `<script type="module" src="https://cdn.nexuscloud.ai/components/nexus-date-picker.js"></script>\n\n<nexus-date-picker ${modeAttr} enable-time="true" format="YYYY-MM-DD" theme="dark"></nexus-date-picker>\n\n<script>\n  const picker = document.querySelector('nexus-date-picker');\n  picker.addEventListener('date-select', (e) => {\n    console.log('Selected date:', e.detail);\n  });\n</script>`;
   }
 }

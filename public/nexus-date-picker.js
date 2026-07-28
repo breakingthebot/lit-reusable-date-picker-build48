@@ -6,13 +6,15 @@ import {
   generateCalendarGrid,
   getPresetRanges,
   formatDate,
+  formatDateTime,
+  validateTime,
   validateDateRange,
   getKeyboardNavigationDate
 } from '/datePickerService.js';
 
 class NexusDatePicker extends HTMLElement {
   static get observedAttributes() {
-    return ['mode', 'format', 'theme', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
+    return ['mode', 'format', 'theme', 'enable-time', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
   }
 
   constructor() {
@@ -26,6 +28,8 @@ class NexusDatePicker extends HTMLElement {
       mode: this.getAttribute('mode') || 'single',
       format: this.getAttribute('format') || 'YYYY-MM-DD',
       theme: this.getAttribute('theme') || 'dark',
+      enableTime: this.getAttribute('enable-time') === 'true',
+      time: '12:00',
       minDate: this.getAttribute('min-date') || '',
       maxDate: this.getAttribute('max-date') || '',
       value: this.getAttribute('value') || '',
@@ -55,6 +59,7 @@ class NexusDatePicker extends HTMLElement {
     if (name === 'mode') this.state.mode = newValue || 'single';
     if (name === 'format') this.state.format = newValue || 'YYYY-MM-DD';
     if (name === 'theme') this.state.theme = newValue || 'dark';
+    if (name === 'enable-time') this.state.enableTime = newValue === 'true';
     if (name === 'min-date') this.state.minDate = newValue || '';
     if (name === 'max-date') this.state.maxDate = newValue || '';
     if (name === 'value') this.state.value = newValue || '';
@@ -146,13 +151,18 @@ class NexusDatePicker extends HTMLElement {
 
     if (this.state.mode === 'single') {
       this.state.value = dateStr;
-      this.state.isOpen = false;
+      if (!this.state.enableTime) {
+        this.state.isOpen = false;
+      }
 
-      const formatted = formatDate(dateStr, this.state.format);
+      const formatted = this.state.enableTime 
+        ? formatDateTime(dateStr, this.state.time, this.state.format)
+        : formatDate(dateStr, this.state.format);
+
       this.dispatchEvent(new CustomEvent('date-select', {
         bubbles: true,
         composed: true,
-        detail: { value: dateStr, formatted }
+        detail: { value: dateStr, time: this.state.time, formatted }
       }));
     } else {
       // Range mode
@@ -164,10 +174,17 @@ class NexusDatePicker extends HTMLElement {
           this.state.rangeStart = dateStr;
         } else {
           this.state.rangeEnd = dateStr;
-          this.state.isOpen = false;
+          if (!this.state.enableTime) {
+            this.state.isOpen = false;
+          }
 
-          const startFmt = formatDate(this.state.rangeStart, this.state.format);
-          const endFmt = formatDate(dateStr, this.state.format);
+          const startFmt = this.state.enableTime 
+            ? formatDateTime(this.state.rangeStart, this.state.time, this.state.format)
+            : formatDate(this.state.rangeStart, this.state.format);
+
+          const endFmt = this.state.enableTime 
+            ? formatDateTime(dateStr, this.state.time, this.state.format)
+            : formatDate(dateStr, this.state.format);
 
           this.dispatchEvent(new CustomEvent('range-select', {
             bubbles: true,
@@ -175,6 +192,7 @@ class NexusDatePicker extends HTMLElement {
             detail: {
               rangeStart: this.state.rangeStart,
               rangeEnd: dateStr,
+              time: this.state.time,
               formatted: `${startFmt} - ${endFmt}`
             }
           }));
@@ -208,12 +226,18 @@ class NexusDatePicker extends HTMLElement {
 
   getInputValueText() {
     if (this.state.mode === 'single') {
-      return this.state.value ? formatDate(this.state.value, this.state.format) : 'Select date...';
+      if (!this.state.value) return 'Select date...';
+      return this.state.enableTime 
+        ? formatDateTime(this.state.value, this.state.time, this.state.format)
+        : formatDate(this.state.value, this.state.format);
     } else {
       if (this.state.rangeStart && this.state.rangeEnd) {
-        return `${formatDate(this.state.rangeStart, this.state.format)} - ${formatDate(this.state.rangeEnd, this.state.format)}`;
+        const startFmt = this.state.enableTime ? formatDateTime(this.state.rangeStart, this.state.time, this.state.format) : formatDate(this.state.rangeStart, this.state.format);
+        const endFmt = this.state.enableTime ? formatDateTime(this.state.rangeEnd, this.state.time, this.state.format) : formatDate(this.state.rangeEnd, this.state.format);
+        return `${startFmt} - ${endFmt}`;
       } else if (this.state.rangeStart) {
-        return `${formatDate(this.state.rangeStart, this.state.format)} - Select end...`;
+        const startFmt = this.state.enableTime ? formatDateTime(this.state.rangeStart, this.state.time, this.state.format) : formatDate(this.state.rangeStart, this.state.format);
+        return `${startFmt} - Select end...`;
       }
       return 'Select date range...';
     }
@@ -226,6 +250,8 @@ class NexusDatePicker extends HTMLElement {
       mode,
       format,
       theme,
+      enableTime,
+      time,
       minDate,
       maxDate,
       value,
@@ -276,7 +302,7 @@ class NexusDatePicker extends HTMLElement {
           display: flex;
           align-items: center;
           gap: 10px;
-          min-width: 220px;
+          min-width: 240px;
           justify-content: space-between;
           transition: all 0.2s ease;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -298,8 +324,14 @@ class NexusDatePicker extends HTMLElement {
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
           z-index: 100;
           display: ${isOpen ? 'flex' : 'none'};
+          flex-direction: column;
           gap: 16px;
           backdrop-filter: blur(16px);
+        }
+
+        .dropdown-content {
+          display: flex;
+          gap: 16px;
         }
 
         .presets-sidebar {
@@ -429,6 +461,38 @@ class NexusDatePicker extends HTMLElement {
           opacity: 0.2;
           cursor: not-allowed;
         }
+
+        /* Time Picker Bar Styles */
+        .time-picker-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-top: 1px solid var(--border-color);
+          padding-top: 12px;
+        }
+
+        .time-label {
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--text-muted);
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .time-input {
+          background: rgba(30, 41, 59, 0.8);
+          border: 1px solid var(--border-color);
+          color: var(--text-main);
+          padding: 6px 10px;
+          border-radius: 8px;
+          font-size: 13px;
+          outline: none;
+        }
+
+        .time-input:focus {
+          border-color: var(--accent-purple);
+        }
       </style>
 
       <button type="button" class="picker-trigger" aria-haspopup="dialog" aria-expanded="${isOpen}">
@@ -437,56 +501,65 @@ class NexusDatePicker extends HTMLElement {
       </button>
 
       <div class="calendar-dropdown" role="dialog" aria-label="Calendar date picker">
-        ${mode === 'range' ? `
-          <div class="presets-sidebar" role="menu" aria-label="Quick date presets">
-            <strong style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Presets</strong>
-            ${presets.map(p => `
-              <button type="button" class="preset-btn" data-preset="${p.key}" role="menuitem">${p.label}</button>
-            `).join('')}
-          </div>
-        ` : ''}
+        <div class="dropdown-content">
+          ${mode === 'range' ? `
+            <div class="presets-sidebar" role="menu" aria-label="Quick date presets">
+              <strong style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Presets</strong>
+              ${presets.map(p => `
+                <button type="button" class="preset-btn" data-preset="${p.key}" role="menuitem">${p.label}</button>
+              `).join('')}
+            </div>
+          ` : ''}
 
-        <div class="calendar-main">
-          <div class="header-nav">
-            <button type="button" class="nav-btn btn-prev" aria-label="Previous month">◀</button>
-            <span class="month-title" aria-live="polite">${monthNames[month]} ${year}</span>
-            <button type="button" class="nav-btn btn-next" aria-label="Next month">▶</button>
-          </div>
+          <div class="calendar-main">
+            <div class="header-nav">
+              <button type="button" class="nav-btn btn-prev" aria-label="Previous month">◀</button>
+              <span class="month-title" aria-live="polite">${monthNames[month]} ${year}</span>
+              <button type="button" class="nav-btn btn-next" aria-label="Next month">▶</button>
+            </div>
 
-          <div class="weekdays-row" role="row">
-            <span role="columnheader" aria-label="Sunday">Su</span>
-            <span role="columnheader" aria-label="Monday">Mo</span>
-            <span role="columnheader" aria-label="Tuesday">Tu</span>
-            <span role="columnheader" aria-label="Wednesday">We</span>
-            <span role="columnheader" aria-label="Thursday">Th</span>
-            <span role="columnheader" aria-label="Friday">Fr</span>
-            <span role="columnheader" aria-label="Saturday">Sa</span>
-          </div>
+            <div class="weekdays-row" role="row">
+              <span role="columnheader" aria-label="Sunday">Su</span>
+              <span role="columnheader" aria-label="Monday">Mo</span>
+              <span role="columnheader" aria-label="Tuesday">Tu</span>
+              <span role="columnheader" aria-label="Wednesday">We</span>
+              <span role="columnheader" aria-label="Thursday">Th</span>
+              <span role="columnheader" aria-label="Friday">Fr</span>
+              <span role="columnheader" aria-label="Saturday">Sa</span>
+            </div>
 
-          <div class="days-grid" role="grid" aria-label="${monthNames[month]} ${year} grid">
-            ${grid.map(day => `
-              <button 
-                type="button" 
-                role="gridcell"
-                tabindex="${day.dateStr === focusedDate ? '0' : '-1'}"
-                aria-selected="${day.isSelected || day.isRangeStart || day.isRangeEnd}"
-                aria-disabled="${day.isDisabled}"
-                class="day-cell 
-                  ${!day.isCurrentMonth ? 'other-month' : ''} 
-                  ${day.isToday ? 'today' : ''} 
-                  ${day.isSelected ? 'selected' : ''} 
-                  ${day.isRangeStart ? 'range-start' : ''} 
-                  ${day.isRangeEnd ? 'range-end' : ''} 
-                  ${day.isInRange ? 'in-range' : ''} 
-                  ${day.isDisabled ? 'disabled' : ''}" 
-                data-date="${day.dateStr}"
-                ${day.isDisabled ? 'disabled' : ''}
-              >
-                ${day.dayNumber}
-              </button>
-            `).join('')}
+            <div class="days-grid" role="grid" aria-label="${monthNames[month]} ${year} grid">
+              ${grid.map(day => `
+                <button 
+                  type="button" 
+                  role="gridcell"
+                  tabindex="${day.dateStr === focusedDate ? '0' : '-1'}"
+                  aria-selected="${day.isSelected || day.isRangeStart || day.isRangeEnd}"
+                  aria-disabled="${day.isDisabled}"
+                  class="day-cell 
+                    ${!day.isCurrentMonth ? 'other-month' : ''} 
+                    ${day.isToday ? 'today' : ''} 
+                    ${day.isSelected ? 'selected' : ''} 
+                    ${day.isRangeStart ? 'range-start' : ''} 
+                    ${day.isRangeEnd ? 'range-end' : ''} 
+                    ${day.isInRange ? 'in-range' : ''} 
+                    ${day.isDisabled ? 'disabled' : ''}" 
+                  data-date="${day.dateStr}"
+                  ${day.isDisabled ? 'disabled' : ''}
+                >
+                  ${day.dayNumber}
+                </button>
+              `).join('')}
+            </div>
           </div>
         </div>
+
+        ${enableTime ? `
+          <div class="time-picker-bar">
+            <span class="time-label">⏰ Select Time (HH:MM):</span>
+            <input type="time" class="time-input" value="${time}">
+          </div>
+        ` : ''}
       </div>
     `;
 
@@ -500,6 +573,14 @@ class NexusDatePicker extends HTMLElement {
 
     this.shadowRoot.querySelector('.btn-prev').addEventListener('click', () => this.prevMonth());
     this.shadowRoot.querySelector('.btn-next').addEventListener('click', () => this.nextMonth());
+
+    if (enableTime) {
+      const timeInput = this.shadowRoot.querySelector('.time-input');
+      timeInput?.addEventListener('change', (e) => {
+        this.state.time = e.target.value;
+        this.render();
+      });
+    }
 
     this.shadowRoot.querySelectorAll('.day-cell:not(.disabled)').forEach(btn => {
       btn.addEventListener('click', (e) => {
