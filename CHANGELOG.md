@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-07-28
+
+### Added
+- Integrated **Date Picker Internationalization & Locale Engine (i18n)** in `datePickerService.js` and `public/nexus-date-picker.js`.
+- Added multi-language locale translation dictionaries (`getLocaleTranslations`) for English (`en`), Spanish (`es`), French (`fr`), and German (`de`).
+- Updated `<nexus-date-picker>` with attributes `locale` and `first-day-of-week` (`0` for Sunday, `1` for Monday), translated month titles & weekday header rows, and Monday-first day grid layouts.
+- Added Locale Language and First Day of Week selectors in live controls configurator in `public/index.html`.
+- Added unit tests in `datePickerService.spec.js` (16 total unit tests passing).
+
 ## [0.5.0] - 2026-07-28
 
 ### Added

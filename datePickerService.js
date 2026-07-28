@@ -25,6 +25,41 @@
  */
 
 /**
+ * Returns locale translation dictionaries for month names and weekdays.
+ * @param {'en'|'es'|'fr'|'de'} locale 
+ * @returns {{ months: string[], weekdays: string[] }}
+ */
+export function getLocaleTranslations(locale = 'en') {
+  switch (locale) {
+    case 'es':
+      return {
+        months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+        weekdaysSun: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+        weekdaysMon: ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do']
+      };
+    case 'fr':
+      return {
+        months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+        weekdaysSun: ['Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa'],
+        weekdaysMon: ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
+      };
+    case 'de':
+      return {
+        months: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+        weekdaysSun: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+        weekdaysMon: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
+      };
+    case 'en':
+    default:
+      return {
+        months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        weekdaysSun: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+        weekdaysMon: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+      };
+  }
+}
+
+/**
  * Returns number of days in a given month.
  * @param {number} year 
  * @param {number} month - 0-indexed (0 = Jan, 11 = Dec)
@@ -35,32 +70,35 @@ export function getDaysInMonth(year, month) {
 }
 
 /**
- * Returns the day of week index for 1st day of month (0 = Sun, 6 = Sat).
+ * Returns the day of week index for 1st day of month.
  * @param {number} year 
  * @param {number} month - 0-indexed
+ * @param {number} [firstDayOfWeek=0] - 0 for Sunday, 1 for Monday
  * @returns {number}
  */
-export function getFirstDayOfWeek(year, month) {
-  return new Date(year, month, 1).getDay();
+export function getFirstDayOfWeek(year, month, firstDayOfWeek = 0) {
+  const day = new Date(year, month, 1).getDay();
+  if (firstDayOfWeek === 1) {
+    return (day + 6) % 7;
+  }
+  return day;
 }
 
 /**
  * Returns next consecutive month metadata object.
  * @param {number} year 
  * @param {number} month - 0-indexed
+ * @param {'en'|'es'|'fr'|'de'} [locale='en']
  * @returns {{ year: number, month: number, monthName: string }}
  */
-export function getNextMonth(year, month) {
+export function getNextMonth(year, month, locale = 'en') {
   const nextMonth = month === 11 ? 0 : month + 1;
   const nextYear = month === 11 ? year + 1 : year;
-  const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
+  const t = getLocaleTranslations(locale);
   return {
     year: nextYear,
     month: nextMonth,
-    monthName: monthNames[nextMonth]
+    monthName: t.months[nextMonth]
   };
 }
 
@@ -201,6 +239,7 @@ export function parseDateToIso(dateStr) {
  * @param {string} [options.maxDate]
  * @param {string[]} [options.disabledDates]
  * @param {CalendarEvent[]} [options.events]
+ * @param {number} [options.firstDayOfWeek=0]
  * @returns {CalendarDay[]}
  */
 export function generateCalendarGrid(year, month, options = {}) {
@@ -211,11 +250,12 @@ export function generateCalendarGrid(year, month, options = {}) {
     minDate = '',
     maxDate = '',
     disabledDates = [],
-    events = []
+    events = [],
+    firstDayOfWeek = 0
   } = options;
 
   const todayStr = formatDate(new Date(), 'YYYY-MM-DD');
-  const firstDayIndex = getFirstDayOfWeek(year, month);
+  const firstDayIndex = getFirstDayOfWeek(year, month, firstDayOfWeek);
   const totalDaysCurrentMonth = getDaysInMonth(year, month);
   const prevMonthDays = getDaysInMonth(year, month - 1);
 
@@ -347,19 +387,19 @@ export function getFrameworkSnippet(framework = 'react', mode = 'single') {
 
   switch (framework) {
     case 'react':
-      return `import React, { useRef, useEffect } from 'react';\nimport '@nexuscloud/date-picker';\n\nexport function DateFilter() {\n  const pickerRef = useRef(null);\n\n  useEffect(() => {\n    const el = pickerRef.current;\n    const handleSelect = (e) => console.log('Selected date:', e.detail);\n    el?.addEventListener('date-select', handleSelect);\n    return () => el?.removeEventListener('date-select', handleSelect);\n  }, []);\n\n  return (\n    <nexus-date-picker\n      ref={pickerRef}\n      ${modeAttr}\n      format="YYYY-MM-DD"\n      enable-events="true"\n      theme="dark"\n    />\n  );\n}`;
+      return `import React, { useRef, useEffect } from 'react';\nimport '@nexuscloud/date-picker';\n\nexport function DateFilter() {\n  const pickerRef = useRef(null);\n\n  useEffect(() => {\n    const el = pickerRef.current;\n    const handleSelect = (e) => console.log('Selected date:', e.detail);\n    el?.addEventListener('date-select', handleSelect);\n    return () => el?.removeEventListener('date-select', handleSelect);\n  }, []);\n\n  return (\n    <nexus-date-picker\n      ref={pickerRef}\n      ${modeAttr}\n      format="YYYY-MM-DD"\n      locale="es"\n      first-day-of-week="1"\n      theme="dark"\n    />\n  );\n}`;
 
     case 'vue':
-      return `<template>\n  <nexus-date-picker\n    ${modeAttr}\n    format="YYYY-MM-DD"\n    enable-events="true"\n    theme="dark"\n    @date-select="onDateSelect"\n  />\n</template>\n\n<script setup>\nimport '@nexuscloud/date-picker';\n\nconst onDateSelect = (event) => {\n  console.log('Vue selected date:', event.detail);\n};\n</script>`;
+      return `<template>\n  <nexus-date-picker\n    ${modeAttr}\n    format="YYYY-MM-DD"\n    locale="es"\n    first-day-of-week="1"\n    theme="dark"\n    @date-select="onDateSelect"\n  />\n</template>\n\n<script setup>\nimport '@nexuscloud/date-picker';\n\nconst onDateSelect = (event) => {\n  console.log('Vue selected date:', event.detail);\n};\n</script>`;
 
     case 'angular':
-      return `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';\nimport '@nexuscloud/date-picker';\n\n@Component({\n  selector: 'app-date-filter',\n  schemas: [CUSTOM_ELEMENTS_SCHEMA],\n  template: \`\n    <nexus-date-picker \n      ${modeAttr} \n      enable-events="true"\n      format="YYYY-MM-DD"\n      (date-select)="onDateSelect($event)">\n    </nexus-date-picker>\n  \`\n})\nexport class DateFilterComponent {\n  onDateSelect(event: CustomEvent) {\n    console.log('Angular date:', event.detail);\n  }\n}`;
+      return `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';\nimport '@nexuscloud/date-picker';\n\n@Component({\n  selector: 'app-date-filter',\n  schemas: [CUSTOM_ELEMENTS_SCHEMA],\n  template: \`\n    <nexus-date-picker \n      ${modeAttr} \n      locale="es"\n      first-day-of-week="1"\n      format="YYYY-MM-DD"\n      (date-select)="onDateSelect($event)">\n    </nexus-date-picker>\n  \`\n})\nexport class DateFilterComponent {\n  onDateSelect(event: CustomEvent) {\n    console.log('Angular date:', event.detail);\n  }\n}`;
 
     case 'svelte':
-      return `<script>\n  import { onMount } from 'svelte';\n  import '@nexuscloud/date-picker';\n\n  let selectedDate = '';\n  function handleSelect(event) {\n    selectedDate = event.detail.value;\n  }\n</script>\n\n<nexus-date-picker ${modeAttr} enable-events="true" on:date-select={handleSelect} />\n<p>Selected: {selectedDate}</p>`;
+      return `<script>\n  import { onMount } from 'svelte';\n  import '@nexuscloud/date-picker';\n\n  let selectedDate = '';\n  function handleSelect(event) {\n    selectedDate = event.detail.value;\n  }\n</script>\n\n<nexus-date-picker ${modeAttr} locale="es" first-day-of-week="1" on:date-select={handleSelect} />\n<p>Selected: {selectedDate}</p>`;
 
     case 'vanilla':
     default:
-      return `<script type="module" src="https://cdn.nexuscloud.ai/components/nexus-date-picker.js"></script>\n\n<nexus-date-picker ${modeAttr} enable-events="true" format="YYYY-MM-DD" theme="dark"></nexus-date-picker>\n\n<script>\n  const picker = document.querySelector('nexus-date-picker');\n  picker.addEventListener('date-select', (e) => {\n    console.log('Selected date:', e.detail);\n  });\n</script>`;
+      return `<script type="module" src="https://cdn.nexuscloud.ai/components/nexus-date-picker.js"></script>\n\n<nexus-date-picker ${modeAttr} locale="es" first-day-of-week="1" format="YYYY-MM-DD" theme="dark"></nexus-date-picker>\n\n<script>\n  const picker = document.querySelector('nexus-date-picker');\n  picker.addEventListener('date-select', (e) => {\n    console.log('Selected date:', e.detail);\n  });\n</script>`;
   }
 }

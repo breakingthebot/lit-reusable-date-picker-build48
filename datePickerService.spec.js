@@ -8,6 +8,7 @@ import {
   getFirstDayOfWeek,
   getNextMonth,
   getSampleEvents,
+  getLocaleTranslations,
   formatDate,
   formatDateTime,
   validateTime,
@@ -24,6 +25,23 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('retrieves multi-language locale translations (en, es, fr, de)', () => {
+    const es = getLocaleTranslations('es');
+    const fr = getLocaleTranslations('fr');
+    const de = getLocaleTranslations('de');
+
+    expect(es.months[0]).toBe('Enero');
+    expect(fr.months[0]).toBe('Janvier');
+    expect(de.months[0]).toBe('Januar');
+    expect(es.weekdaysMon[0]).toBe('Lu');
+  });
+
+  it('calculates first day of week index for Sunday (0) vs Monday (1) start of week', () => {
+    // 2026-07-01 was a Wednesday (Sunday-based index 3, Monday-based index 2)
+    expect(getFirstDayOfWeek(2026, 6, 0)).toBe(3);
+    expect(getFirstDayOfWeek(2026, 6, 1)).toBe(2);
   });
 
   it('retrieves sample event markers and attaches events to calendar grid cells', () => {

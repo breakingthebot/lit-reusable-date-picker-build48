@@ -7,6 +7,7 @@ import {
   getPresetRanges,
   getNextMonth,
   getSampleEvents,
+  getLocaleTranslations,
   formatDate,
   formatDateTime,
   validateTime,
@@ -16,7 +17,7 @@ import {
 
 class NexusDatePicker extends HTMLElement {
   static get observedAttributes() {
-    return ['mode', 'format', 'theme', 'enable-time', 'enable-events', 'view-months', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
+    return ['mode', 'format', 'theme', 'locale', 'first-day-of-week', 'enable-time', 'enable-events', 'view-months', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
   }
 
   constructor() {
@@ -30,6 +31,8 @@ class NexusDatePicker extends HTMLElement {
       mode: this.getAttribute('mode') || 'single',
       format: this.getAttribute('format') || 'YYYY-MM-DD',
       theme: this.getAttribute('theme') || 'dark',
+      locale: this.getAttribute('locale') || 'en',
+      firstDayOfWeek: parseInt(this.getAttribute('first-day-of-week') || '0'),
       enableTime: this.getAttribute('enable-time') === 'true',
       enableEvents: this.getAttribute('enable-events') === 'true',
       viewMonths: parseInt(this.getAttribute('view-months') || '1'),
@@ -64,6 +67,8 @@ class NexusDatePicker extends HTMLElement {
     if (name === 'mode') this.state.mode = newValue || 'single';
     if (name === 'format') this.state.format = newValue || 'YYYY-MM-DD';
     if (name === 'theme') this.state.theme = newValue || 'dark';
+    if (name === 'locale') this.state.locale = newValue || 'en';
+    if (name === 'first-day-of-week') this.state.firstDayOfWeek = parseInt(newValue || '0');
     if (name === 'enable-time') this.state.enableTime = newValue === 'true';
     if (name === 'enable-events') this.state.enableEvents = newValue === 'true';
     if (name === 'view-months') this.state.viewMonths = parseInt(newValue || '1');
@@ -253,30 +258,22 @@ class NexusDatePicker extends HTMLElement {
   }
 
   renderMonthPanel(year, month, grid, isSecondMonth = false) {
-    const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
+    const t = getLocaleTranslations(this.state.locale);
+    const weekdays = this.state.firstDayOfWeek === 1 ? t.weekdaysMon : t.weekdaysSun;
 
     return `
       <div class="calendar-main">
         <div class="header-nav">
           ${!isSecondMonth ? `<button type="button" class="nav-btn btn-prev" aria-label="Previous month">◀</button>` : '<div></div>'}
-          <span class="month-title" aria-live="polite">${monthNames[month]} ${year}</span>
+          <span class="month-title" aria-live="polite">${t.months[month]} ${year}</span>
           ${(isSecondMonth || this.state.viewMonths === 1) ? `<button type="button" class="nav-btn btn-next" aria-label="Next month">▶</button>` : '<div></div>'}
         </div>
 
         <div class="weekdays-row" role="row">
-          <span role="columnheader" aria-label="Sunday">Su</span>
-          <span role="columnheader" aria-label="Monday">Mo</span>
-          <span role="columnheader" aria-label="Tuesday">Tu</span>
-          <span role="columnheader" aria-label="Wednesday">We</span>
-          <span role="columnheader" aria-label="Thursday">Th</span>
-          <span role="columnheader" aria-label="Friday">Fr</span>
-          <span role="columnheader" aria-label="Saturday">Sa</span>
+          ${weekdays.map(w => `<span role="columnheader">${w}</span>`).join('')}
         </div>
 
-        <div class="days-grid" role="grid" aria-label="${monthNames[month]} ${year} grid">
+        <div class="days-grid" role="grid" aria-label="${t.months[month]} ${year} grid">
           ${grid.map(day => {
             const hasEvents = this.state.enableEvents && day.events && day.events.length > 0;
             const eventTitle = hasEvents ? day.events.map(e => e.title).join(', ') : '';
@@ -321,6 +318,8 @@ class NexusDatePicker extends HTMLElement {
       mode,
       format,
       theme,
+      locale,
+      firstDayOfWeek,
       enableTime,
       enableEvents,
       viewMonths,
@@ -341,21 +340,23 @@ class NexusDatePicker extends HTMLElement {
       rangeEnd,
       minDate,
       maxDate,
-      events: enableEvents ? events : []
+      events: enableEvents ? events : [],
+      firstDayOfWeek
     });
 
     let grid2 = null;
     let nextMonthMeta = null;
 
     if (viewMonths === 2) {
-      nextMonthMeta = getNextMonth(year, month);
+      nextMonthMeta = getNextMonth(year, month, locale);
       grid2 = generateCalendarGrid(nextMonthMeta.year, nextMonthMeta.month, {
         selectedDate: value,
         rangeStart,
         rangeEnd,
         minDate,
         maxDate,
-        events: enableEvents ? events : []
+        events: enableEvents ? events : [],
+        firstDayOfWeek
       });
     }
 

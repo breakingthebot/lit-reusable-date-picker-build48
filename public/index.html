@@ -96,6 +96,25 @@
           </select>
         </div>
 
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="control-group">
+            <label class="control-label">Locale (locale)</label>
+            <select id="localeSelect" class="form-select">
+              <option value="en">🇺🇸 English (en)</option>
+              <option value="es">🇪🇸 Spanish (es)</option>
+              <option value="fr">🇫🇷 French (fr)</option>
+              <option value="de">🇩🇪 German (de)</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label class="control-label">First Day of Week</label>
+            <select id="firstDaySelect" class="form-select">
+              <option value="0">Sunday (0)</option>
+              <option value="1">Monday (1)</option>
+            </select>
+          </div>
+        </div>
+
         <div class="control-group">
           <label class="control-label">Theme Variable (theme)</label>
           <select id="themeSelect" class="form-select">
@@ -183,6 +202,12 @@
       const viewMonthsSelect = document.getElementById('viewMonthsSelect');
       picker.setAttribute('view-months', '2');
       viewMonthsSelect.addEventListener('change', (e) => picker.setAttribute('view-months', e.target.value));
+
+      const localeSelect = document.getElementById('localeSelect');
+      localeSelect.addEventListener('change', (e) => picker.setAttribute('locale', e.target.value));
+
+      const firstDaySelect = document.getElementById('firstDaySelect');
+      firstDaySelect.addEventListener('change', (e) => picker.setAttribute('first-day-of-week', e.target.value));
       const enableTimeCheckbox = document.getElementById('enableTimeCheckbox');
       picker.setAttribute('enable-time', 'true');
       enableTimeCheckbox.addEventListener('change', (e) => picker.setAttribute('enable-time', e.target.checked ? 'true' : 'false'));
