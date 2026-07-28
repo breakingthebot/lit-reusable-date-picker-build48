@@ -50,6 +50,7 @@
               enable-time="true"
               enable-events="true"
               enable-export="true"
+              enable-touch="true"
               name="bookingDates"
               required="true"
             ></nexus-date-picker>
@@ -188,6 +189,13 @@
           </label>
         </div>
 
+        <div class="control-group">
+          <label class="control-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+            <input type="checkbox" id="enableTouchCheckbox" checked>
+            <span>📱 Enable Touch Drag Range Selection (enable-touch="true")</span>
+          </label>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="control-group">
             <label class="control-label">Minimum Date (min-date)</label>
@@ -278,6 +286,9 @@
 
       const enableExportCheckbox = document.getElementById('enableExportCheckbox');
       enableExportCheckbox?.addEventListener('change', (e) => picker?.setAttribute('enable-export', e.target.checked ? 'true' : 'false'));
+
+      const enableTouchCheckbox = document.getElementById('enableTouchCheckbox');
+      enableTouchCheckbox?.addEventListener('change', (e) => picker?.setAttribute('enable-touch', e.target.checked ? 'true' : 'false'));
 
       // Form submit listener
       const demoForm = document.getElementById('demoForm');

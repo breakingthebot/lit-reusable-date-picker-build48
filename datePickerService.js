@@ -25,6 +25,24 @@
  */
 
 /**
+ * Calculates start and end range dates when user performs touch drag gestures over grid cells.
+ * @param {string} touchStartDate 
+ * @param {string} touchCurrentDate 
+ * @returns {{ rangeStart: string, rangeEnd: string }}
+ */
+export function handleTouchRangeSelection(touchStartDate, touchCurrentDate) {
+  if (!touchStartDate || !touchCurrentDate) {
+    return { rangeStart: touchStartDate || '', rangeEnd: '' };
+  }
+
+  if (touchCurrentDate < touchStartDate) {
+    return { rangeStart: touchCurrentDate, rangeEnd: touchStartDate };
+  }
+
+  return { rangeStart: touchStartDate, rangeEnd: touchCurrentDate };
+}
+
+/**
  * Generates iCalendar (.ics) format file string for a selected date range.
  * @param {string} startDateStr - YYYY-MM-DD
  * @param {string} endDateStr - YYYY-MM-DD

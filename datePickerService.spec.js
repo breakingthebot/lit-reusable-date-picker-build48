@@ -15,6 +15,7 @@ import {
   createAnalyticsTracker,
   generateIcsFile,
   generateGoogleCalendarUrl,
+  handleTouchRangeSelection,
   validateFormAssociation,
   formatDate,
   formatDateTime,
@@ -32,6 +33,14 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('calculates touch range selections for mobile drag gestures', () => {
+    const rangeNormal = handleTouchRangeSelection('2026-07-10', '2026-07-20');
+    expect(rangeNormal).toEqual({ rangeStart: '2026-07-10', rangeEnd: '2026-07-20' });
+
+    const rangeReverse = handleTouchRangeSelection('2026-07-20', '2026-07-10');
+    expect(rangeReverse).toEqual({ rangeStart: '2026-07-10', rangeEnd: '2026-07-20' });
   });
 
   it('generates iCalendar (.ics) string format and Google Calendar event URLs', () => {

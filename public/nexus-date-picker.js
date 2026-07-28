@@ -11,6 +11,7 @@ import {
   createAnalyticsTracker,
   generateIcsFile,
   generateGoogleCalendarUrl,
+  handleTouchRangeSelection,
   getNextMonth,
   getSampleEvents,
   getLocaleTranslations,
@@ -28,7 +29,7 @@ class NexusDatePicker extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['mode', 'format', 'theme', 'locale', 'first-day-of-week', 'enable-time', 'enable-events', 'enable-export', 'view-months', 'name', 'required', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
+    return ['mode', 'format', 'theme', 'locale', 'first-day-of-week', 'enable-time', 'enable-events', 'enable-export', 'enable-touch', 'view-months', 'name', 'required', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
   }
 
   constructor() {
@@ -40,6 +41,8 @@ class NexusDatePicker extends HTMLElement {
 
     const now = new Date();
     this.analytics = createAnalyticsTracker();
+    this.touchStartState = null;
+
     this.state = {
       year: now.getFullYear(),
       month: now.getMonth(),
@@ -51,6 +54,7 @@ class NexusDatePicker extends HTMLElement {
       enableTime: this.getAttribute('enable-time') === 'true',
       enableEvents: this.getAttribute('enable-events') === 'true',
       enableExport: this.getAttribute('enable-export') === 'true',
+      enableTouch: this.getAttribute('enable-touch') === 'true',
       viewMonths: parseInt(this.getAttribute('view-months') || '1'),
       name: this.getAttribute('name') || 'datePicker',
       required: this.getAttribute('required') === 'true',
@@ -91,6 +95,7 @@ class NexusDatePicker extends HTMLElement {
     if (name === 'enable-time') this.state.enableTime = newValue === 'true';
     if (name === 'enable-events') this.state.enableEvents = newValue === 'true';
     if (name === 'enable-export') this.state.enableExport = newValue === 'true';
+    if (name === 'enable-touch') this.state.enableTouch = newValue === 'true';
     if (name === 'view-months') this.state.viewMonths = parseInt(newValue || '1');
     if (name === 'name') this.state.name = newValue || 'datePicker';
     if (name === 'required') this.state.required = newValue === 'true';
@@ -441,6 +446,7 @@ class NexusDatePicker extends HTMLElement {
       enableTime,
       enableEvents,
       enableExport,
+      enableTouch,
       viewMonths,
       name,
       required,
@@ -501,6 +507,7 @@ class NexusDatePicker extends HTMLElement {
           --accent-purple: ${currentTheme.accent};
           --range-bg: ${currentTheme.rangeBg};
           position: relative;
+          touch-action: ${enableTouch ? 'none' : 'auto'};
         }
 
         .picker-trigger {
@@ -856,6 +863,49 @@ class NexusDatePicker extends HTMLElement {
     if (enableExport) {
       this.shadowRoot.querySelector('.btn-ics')?.addEventListener('click', () => this.downloadIcsFile());
       this.shadowRoot.querySelector('.btn-gcal')?.addEventListener('click', () => this.openGoogleCalendar());
+    }
+
+    // Touch gesture drag range handling
+    if (enableTouch && mode === 'range') {
+      this.shadowRoot.querySelectorAll('.days-grid').forEach(gridEl => {
+        gridEl.addEventListener('touchstart', (e) => {
+          const targetBtn = e.target.closest('.day-cell:not(.disabled)');
+          if (targetBtn) {
+            this.touchStartState = targetBtn.getAttribute('data-date');
+          }
+        }, { passive: true });
+
+        gridEl.addEventListener('touchmove', (e) => {
+          if (!this.touchStartState) return;
+          const touch = e.touches[0];
+          const elem = this.shadowRoot.elementFromPoint(touch.clientX, touch.clientY);
+          const currentBtn = elem?.closest('.day-cell:not(.disabled)');
+          if (currentBtn) {
+            const currentDate = currentBtn.getAttribute('data-date');
+            const calculated = handleTouchRangeSelection(this.touchStartState, currentDate);
+            this.state.rangeStart = calculated.rangeStart;
+            this.state.rangeEnd = calculated.rangeEnd;
+            this.render();
+          }
+        }, { passive: true });
+
+        gridEl.addEventListener('touchend', () => {
+          if (this.touchStartState && this.state.rangeStart && this.state.rangeEnd) {
+            this.updateFormValue();
+            this.dispatchAnalytics('selection');
+            this.dispatchEvent(new CustomEvent('range-select', {
+              bubbles: true,
+              composed: true,
+              detail: {
+                rangeStart: this.state.rangeStart,
+                rangeEnd: this.state.rangeEnd,
+                formatted: `${formatDate(this.state.rangeStart, this.state.format)} - ${formatDate(this.state.rangeEnd, this.state.format)}`
+              }
+            }));
+          }
+          this.touchStartState = null;
+        });
+      });
     }
 
     this.shadowRoot.querySelectorAll('.day-cell:not(.disabled)').forEach(btn => {

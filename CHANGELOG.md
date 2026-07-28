@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-28
+
+### Added
+- Integrated **Date Picker Touch Gesture & Mobile Drag Range Engine** in `datePickerService.js` and `public/nexus-date-picker.js`.
+- Added touch range selection calculation helper (`handleTouchRangeSelection`).
+- Updated `<nexus-date-picker>` with attribute `enable-touch="true"`, adding `touchstart`, `touchmove`, and `touchend` event listeners to enable touch drag-to-select date range gestures on mobile viewports.
+- Added Touch Drag Range Selection toggle checkbox in live controls configurator in `public/index.html`.
+- Added unit tests in `datePickerService.spec.js` (23 total unit tests passing).
+
 ## [1.2.0] - 2026-07-28
 
 ### Added
