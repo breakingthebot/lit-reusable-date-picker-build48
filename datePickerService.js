@@ -25,6 +25,36 @@
  */
 
 /**
+ * Creates real-time funnel analytics tracker object.
+ * @returns {{ opens: number, selections: number, presetClicks: number, logOpen: Function, logSelection: Function, logPreset: Function, getSummary: Function }}
+ */
+export function createAnalyticsTracker() {
+  const metrics = {
+    opens: 0,
+    selections: 0,
+    presetClicks: 0
+  };
+
+  return {
+    logOpen() {
+      metrics.opens += 1;
+      return { ...metrics };
+    },
+    logSelection() {
+      metrics.selections += 1;
+      return { ...metrics };
+    },
+    logPreset() {
+      metrics.presetClicks += 1;
+      return { ...metrics };
+    },
+    getSummary() {
+      return { ...metrics };
+    }
+  };
+}
+
+/**
  * Returns theme design token variables for 4 distinct glassmorphism aesthetic presets.
  * @returns {Record<string, { label: string, bgCard: string, textMain: string, textMuted: string, accent: string, rangeBg: string, borderColor: string }>}
  */

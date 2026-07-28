@@ -8,6 +8,7 @@ import {
   getRelativePresets,
   getYearOptions,
   getThemePresets,
+  createAnalyticsTracker,
   getNextMonth,
   getSampleEvents,
   getLocaleTranslations,
@@ -36,6 +37,7 @@ class NexusDatePicker extends HTMLElement {
     }
 
     const now = new Date();
+    this.analytics = createAnalyticsTracker();
     this.state = {
       year: now.getFullYear(),
       month: now.getMonth(),
@@ -116,6 +118,19 @@ class NexusDatePicker extends HTMLElement {
     }
   }
 
+  dispatchAnalytics(eventType) {
+    let summary;
+    if (eventType === 'open') summary = this.analytics.logOpen();
+    if (eventType === 'selection') summary = this.analytics.logSelection();
+    if (eventType === 'preset') summary = this.analytics.logPreset();
+
+    this.dispatchEvent(new CustomEvent('date-picker-analytics', {
+      bubbles: true,
+      composed: true,
+      detail: { eventType, metrics: summary }
+    }));
+  }
+
   getSubmitValue() {
     if (this.state.mode === 'single') {
       if (!this.state.value) return '';
@@ -144,6 +159,7 @@ class NexusDatePicker extends HTMLElement {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
         e.preventDefault();
         this.state.isOpen = true;
+        this.dispatchAnalytics('open');
         this.render();
       }
       return;
@@ -184,6 +200,9 @@ class NexusDatePicker extends HTMLElement {
 
   togglePicker() {
     this.state.isOpen = !this.state.isOpen;
+    if (this.state.isOpen) {
+      this.dispatchAnalytics('open');
+    }
     this.render();
   }
 
@@ -209,7 +228,6 @@ class NexusDatePicker extends HTMLElement {
 
   selectDay(dateStr) {
     this.state.focusedDate = dateStr;
-
     const matchedEvents = this.state.enableEvents ? this.state.events.filter(e => e.date === dateStr) : [];
 
     if (this.state.mode === 'single') {
@@ -223,6 +241,7 @@ class NexusDatePicker extends HTMLElement {
         : formatDate(dateStr, this.state.format);
 
       this.updateFormValue();
+      this.dispatchAnalytics('selection');
 
       this.dispatchEvent(new CustomEvent('date-select', {
         bubbles: true,
@@ -252,6 +271,7 @@ class NexusDatePicker extends HTMLElement {
             : formatDate(dateStr, this.state.format);
 
           this.updateFormValue();
+          this.dispatchAnalytics('selection');
 
           this.dispatchEvent(new CustomEvent('range-select', {
             bubbles: true,
@@ -279,6 +299,7 @@ class NexusDatePicker extends HTMLElement {
     const endFmt = formatDate(preset.rangeEnd, this.state.format);
 
     this.updateFormValue();
+    this.dispatchAnalytics('preset');
 
     this.dispatchEvent(new CustomEvent('range-select', {
       bubbles: true,

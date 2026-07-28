@@ -68,6 +68,30 @@
             <em>Waiting for date selection...</em>
           </div>
         </div>
+      </div>
+
+      <!-- Real-Time Date Picker Funnel Analytics Dashboard -->
+      <div class="card card-glow" style="margin-top: 16px;">
+        <div class="card-header">
+          <h2>📊 Real-Time Interactivity Funnel Analytics</h2>
+          <span class="badge badge-purple">Analytics Audit Engine</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; text-align: center;">
+          <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px;">
+            <div style="font-size: 22px; font-weight: 700; color: #8b5cf6;" id="metricOpens">0</div>
+            <div style="font-size: 12px; color: #94a3b8;">👁️ Modal Opens</div>
+          </div>
+          <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px;">
+            <div style="font-size: 22px; font-weight: 700; color: #10b981;" id="metricSelections">0</div>
+            <div style="font-size: 12px; color: #94a3b8;">🎯 Date Selections</div>
+          </div>
+          <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px;">
+            <div style="font-size: 22px; font-weight: 700; color: #3b82f6;" id="metricPresets">0</div>
+            <div style="font-size: 12px; color: #94a3b8;">⚡ Preset Clicks</div>
+          </div>
+        </div>
+      </div>
 
         <div style="margin-top: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 14px;">
           <strong style="font-size: 13px; color: var(--text-main); display: block; margin-bottom: 6px;">⌨️ Keyboard Shortcuts Guide (WCAG 2.1 AA):</strong>
@@ -213,8 +237,11 @@
           eventOutput.innerHTML = `<strong>date-select:</strong> <code>${JSON.stringify(e.detail)}</code>`;
         });
 
-        picker.addEventListener('range-select', (e) => {
-          eventOutput.innerHTML = `<strong>range-select:</strong> <code>${JSON.stringify(e.detail)}</code>`;
+        picker.addEventListener('date-picker-analytics', (e) => {
+          const { opens, selections, presetClicks } = e.detail.metrics;
+          document.getElementById('metricOpens').textContent = opens;
+          document.getElementById('metricSelections').textContent = selections;
+          document.getElementById('metricPresets').textContent = presetClicks;
         });
       }
 

@@ -12,6 +12,7 @@ import {
   getRelativePresets,
   getYearOptions,
   getThemePresets,
+  createAnalyticsTracker,
   validateFormAssociation,
   formatDate,
   formatDateTime,
@@ -29,6 +30,21 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('tracks real-time funnel analytics (opens, selections, preset clicks)', () => {
+    const tracker = createAnalyticsTracker();
+    expect(tracker.getSummary()).toEqual({ opens: 0, selections: 0, presetClicks: 0 });
+
+    tracker.logOpen();
+    tracker.logOpen();
+    tracker.logSelection();
+    tracker.logPreset();
+
+    const summary = tracker.getSummary();
+    expect(summary.opens).toBe(2);
+    expect(summary.selections).toBe(1);
+    expect(summary.presetClicks).toBe(1);
   });
 
   it('retrieves theme design token presets (dark, cyber, light, midnight)', () => {

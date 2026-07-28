@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-07-28
+
+### Added
+- Integrated **Date Picker Analytics & Interactivity Audit Console** in `datePickerService.js` and `public/nexus-date-picker.js`.
+- Added funnel analytics tracker (`createAnalyticsTracker`).
+- Updated `<nexus-date-picker>` emitting `date-picker-analytics` CustomEvent with real-time interaction metrics (`opens`, `selections`, `presetClicks`).
+- Added Real-Time Funnel Analytics Dashboard card rendering live metric counters in `public/index.html`.
+- Added unit tests in `datePickerService.spec.js` (21 total unit tests passing).
+
 ## [1.0.0] - 2026-07-28
 
 ### Added
