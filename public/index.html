@@ -111,6 +111,13 @@
           </label>
         </div>
 
+        <div class="control-group">
+          <label class="control-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+            <input type="checkbox" id="enableEventsCheckbox" checked>
+            <span>📌 Enable Contextual Event Badges (enable-events="true")</span>
+          </label>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="control-group">
             <label class="control-label">Minimum Date (min-date)</label>
@@ -179,6 +186,10 @@
       const enableTimeCheckbox = document.getElementById('enableTimeCheckbox');
       picker.setAttribute('enable-time', 'true');
       enableTimeCheckbox.addEventListener('change', (e) => picker.setAttribute('enable-time', e.target.checked ? 'true' : 'false'));
+
+      const enableEventsCheckbox = document.getElementById('enableEventsCheckbox');
+      picker.setAttribute('enable-events', 'true');
+      enableEventsCheckbox.addEventListener('change', (e) => picker.setAttribute('enable-events', e.target.checked ? 'true' : 'false'));
       minDateInput.addEventListener('change', (e) => picker.setAttribute('min-date', e.target.value));
       maxDateInput.addEventListener('change', (e) => picker.setAttribute('max-date', e.target.value));
 

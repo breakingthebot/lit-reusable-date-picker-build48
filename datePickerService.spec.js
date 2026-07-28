@@ -7,6 +7,7 @@ import {
   getDaysInMonth,
   getFirstDayOfWeek,
   getNextMonth,
+  getSampleEvents,
   formatDate,
   formatDateTime,
   validateTime,
@@ -23,6 +24,23 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('retrieves sample event markers and attaches events to calendar grid cells', () => {
+    const sampleEvents = getSampleEvents();
+    expect(sampleEvents.length).toBe(4);
+
+    const targetDate = sampleEvents[0].date;
+    const [y, m] = targetDate.split('-').map(Number);
+
+    const grid = generateCalendarGrid(y, m - 1, {
+      events: sampleEvents
+    });
+
+    const eventCell = grid.find(cell => cell.dateStr === targetDate);
+    expect(eventCell).toBeDefined();
+    expect(eventCell.events.length).toBe(1);
+    expect(eventCell.events[0].title).toBe(sampleEvents[0].title);
   });
 
   it('calculates next consecutive month metadata object correctly', () => {

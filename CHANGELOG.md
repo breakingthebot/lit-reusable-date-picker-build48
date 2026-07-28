@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-07-28
+
+### Added
+- Integrated **Date Picker Custom Highlight Markers & Event Badges** in `datePickerService.js` and `public/nexus-date-picker.js`.
+- Added sample events domain provider (`getSampleEvents`) and grid event attachment logic.
+- Updated `<nexus-date-picker>` with attribute `enable-events="true|false"`, state `events`, colored event dot indicators (`.event-dot`), native HTML tooltips (`title="Event: ..."`), and event list payload dispatches (`detail.events`).
+- Added Contextual Event Badges toggle checkbox in live controls configurator in `public/index.html`.
+- Added unit tests in `datePickerService.spec.js` (14 total unit tests passing).
+
 ## [0.4.0] - 2026-07-28
 
 ### Added
