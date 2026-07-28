@@ -6,6 +6,7 @@ import { describe, it, expect } from 'vitest';
 import {
   getDaysInMonth,
   getFirstDayOfWeek,
+  getNextMonth,
   formatDate,
   formatDateTime,
   validateTime,
@@ -22,6 +23,18 @@ describe('datePickerService', () => {
     expect(getDaysInMonth(2026, 1)).toBe(28); // Feb 2026 non-leap
     expect(getDaysInMonth(2024, 1)).toBe(29); // Feb 2024 leap year
     expect(getDaysInMonth(2026, 6)).toBe(31); // July 2026
+  });
+
+  it('calculates next consecutive month metadata object correctly', () => {
+    const nextJul = getNextMonth(2026, 6); // July -> August
+    expect(nextJul.year).toBe(2026);
+    expect(nextJul.month).toBe(7);
+    expect(nextJul.monthName).toBe('August');
+
+    const nextDec = getNextMonth(2026, 11); // Dec 2026 -> Jan 2027
+    expect(nextDec.year).toBe(2027);
+    expect(nextDec.month).toBe(0);
+    expect(nextDec.monthName).toBe('January');
   });
 
   it('combines date and time into formatted DateTime strings', () => {

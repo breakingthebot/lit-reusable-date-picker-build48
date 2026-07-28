@@ -89,6 +89,14 @@
         </div>
 
         <div class="control-group">
+          <label class="control-label">Month Panels Layout (view-months)</label>
+          <select id="viewMonthsSelect" class="form-select">
+            <option value="2">📅 Dual-Month View (view-months="2")</option>
+            <option value="1">📅 Single Month View (view-months="1")</option>
+          </select>
+        </div>
+
+        <div class="control-group">
           <label class="control-label">Theme Variable (theme)</label>
           <select id="themeSelect" class="form-select">
             <option value="dark">🌙 Dark Mode (theme="dark")</option>
@@ -165,6 +173,9 @@
       modeSelect.addEventListener('change', (e) => picker.setAttribute('mode', e.target.value));
       formatSelect.addEventListener('change', (e) => picker.setAttribute('format', e.target.value));
       themeSelect.addEventListener('change', (e) => picker.setAttribute('theme', e.target.value));
+      const viewMonthsSelect = document.getElementById('viewMonthsSelect');
+      picker.setAttribute('view-months', '2');
+      viewMonthsSelect.addEventListener('change', (e) => picker.setAttribute('view-months', e.target.value));
       const enableTimeCheckbox = document.getElementById('enableTimeCheckbox');
       picker.setAttribute('enable-time', 'true');
       enableTimeCheckbox.addEventListener('change', (e) => picker.setAttribute('enable-time', e.target.checked ? 'true' : 'false'));

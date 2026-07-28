@@ -5,6 +5,7 @@
 import {
   generateCalendarGrid,
   getPresetRanges,
+  getNextMonth,
   formatDate,
   formatDateTime,
   validateTime,
@@ -14,7 +15,7 @@ import {
 
 class NexusDatePicker extends HTMLElement {
   static get observedAttributes() {
-    return ['mode', 'format', 'theme', 'enable-time', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
+    return ['mode', 'format', 'theme', 'enable-time', 'view-months', 'min-date', 'max-date', 'value', 'range-start', 'range-end'];
   }
 
   constructor() {
@@ -29,6 +30,7 @@ class NexusDatePicker extends HTMLElement {
       format: this.getAttribute('format') || 'YYYY-MM-DD',
       theme: this.getAttribute('theme') || 'dark',
       enableTime: this.getAttribute('enable-time') === 'true',
+      viewMonths: parseInt(this.getAttribute('view-months') || '1'),
       time: '12:00',
       minDate: this.getAttribute('min-date') || '',
       maxDate: this.getAttribute('max-date') || '',
@@ -60,6 +62,7 @@ class NexusDatePicker extends HTMLElement {
     if (name === 'format') this.state.format = newValue || 'YYYY-MM-DD';
     if (name === 'theme') this.state.theme = newValue || 'dark';
     if (name === 'enable-time') this.state.enableTime = newValue === 'true';
+    if (name === 'view-months') this.state.viewMonths = parseInt(newValue || '1');
     if (name === 'min-date') this.state.minDate = newValue || '';
     if (name === 'max-date') this.state.maxDate = newValue || '';
     if (name === 'value') this.state.value = newValue || '';
@@ -243,6 +246,57 @@ class NexusDatePicker extends HTMLElement {
     }
   }
 
+  renderMonthPanel(year, month, grid, isSecondMonth = false) {
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    return `
+      <div class="calendar-main">
+        <div class="header-nav">
+          ${!isSecondMonth ? `<button type="button" class="nav-btn btn-prev" aria-label="Previous month">◀</button>` : '<div></div>'}
+          <span class="month-title" aria-live="polite">${monthNames[month]} ${year}</span>
+          ${(isSecondMonth || this.state.viewMonths === 1) ? `<button type="button" class="nav-btn btn-next" aria-label="Next month">▶</button>` : '<div></div>'}
+        </div>
+
+        <div class="weekdays-row" role="row">
+          <span role="columnheader" aria-label="Sunday">Su</span>
+          <span role="columnheader" aria-label="Monday">Mo</span>
+          <span role="columnheader" aria-label="Tuesday">Tu</span>
+          <span role="columnheader" aria-label="Wednesday">We</span>
+          <span role="columnheader" aria-label="Thursday">Th</span>
+          <span role="columnheader" aria-label="Friday">Fr</span>
+          <span role="columnheader" aria-label="Saturday">Sa</span>
+        </div>
+
+        <div class="days-grid" role="grid" aria-label="${monthNames[month]} ${year} grid">
+          ${grid.map(day => `
+            <button 
+              type="button" 
+              role="gridcell"
+              tabindex="${day.dateStr === this.state.focusedDate ? '0' : '-1'}"
+              aria-selected="${day.isSelected || day.isRangeStart || day.isRangeEnd}"
+              aria-disabled="${day.isDisabled}"
+              class="day-cell 
+                ${!day.isCurrentMonth ? 'other-month' : ''} 
+                ${day.isToday ? 'today' : ''} 
+                ${day.isSelected ? 'selected' : ''} 
+                ${day.isRangeStart ? 'range-start' : ''} 
+                ${day.isRangeEnd ? 'range-end' : ''} 
+                ${day.isInRange ? 'in-range' : ''} 
+                ${day.isDisabled ? 'disabled' : ''}" 
+              data-date="${day.dateStr}"
+              ${day.isDisabled ? 'disabled' : ''}
+            >
+              ${day.dayNumber}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
   render() {
     const {
       year,
@@ -251,6 +305,7 @@ class NexusDatePicker extends HTMLElement {
       format,
       theme,
       enableTime,
+      viewMonths,
       time,
       minDate,
       maxDate,
@@ -261,7 +316,7 @@ class NexusDatePicker extends HTMLElement {
       isOpen
     } = this.state;
 
-    const grid = generateCalendarGrid(year, month, {
+    const grid1 = generateCalendarGrid(year, month, {
       selectedDate: value,
       rangeStart,
       rangeEnd,
@@ -269,10 +324,19 @@ class NexusDatePicker extends HTMLElement {
       maxDate
     });
 
-    const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
+    let grid2 = null;
+    let nextMonthMeta = null;
+
+    if (viewMonths === 2) {
+      nextMonthMeta = getNextMonth(year, month);
+      grid2 = generateCalendarGrid(nextMonthMeta.year, nextMonthMeta.month, {
+        selectedDate: value,
+        rangeStart,
+        rangeEnd,
+        minDate,
+        maxDate
+      });
+    }
 
     const presets = getPresetRanges();
 
@@ -511,47 +575,9 @@ class NexusDatePicker extends HTMLElement {
             </div>
           ` : ''}
 
-          <div class="calendar-main">
-            <div class="header-nav">
-              <button type="button" class="nav-btn btn-prev" aria-label="Previous month">◀</button>
-              <span class="month-title" aria-live="polite">${monthNames[month]} ${year}</span>
-              <button type="button" class="nav-btn btn-next" aria-label="Next month">▶</button>
-            </div>
+          ${this.renderMonthPanel(year, month, grid1, false)}
 
-            <div class="weekdays-row" role="row">
-              <span role="columnheader" aria-label="Sunday">Su</span>
-              <span role="columnheader" aria-label="Monday">Mo</span>
-              <span role="columnheader" aria-label="Tuesday">Tu</span>
-              <span role="columnheader" aria-label="Wednesday">We</span>
-              <span role="columnheader" aria-label="Thursday">Th</span>
-              <span role="columnheader" aria-label="Friday">Fr</span>
-              <span role="columnheader" aria-label="Saturday">Sa</span>
-            </div>
-
-            <div class="days-grid" role="grid" aria-label="${monthNames[month]} ${year} grid">
-              ${grid.map(day => `
-                <button 
-                  type="button" 
-                  role="gridcell"
-                  tabindex="${day.dateStr === focusedDate ? '0' : '-1'}"
-                  aria-selected="${day.isSelected || day.isRangeStart || day.isRangeEnd}"
-                  aria-disabled="${day.isDisabled}"
-                  class="day-cell 
-                    ${!day.isCurrentMonth ? 'other-month' : ''} 
-                    ${day.isToday ? 'today' : ''} 
-                    ${day.isSelected ? 'selected' : ''} 
-                    ${day.isRangeStart ? 'range-start' : ''} 
-                    ${day.isRangeEnd ? 'range-end' : ''} 
-                    ${day.isInRange ? 'in-range' : ''} 
-                    ${day.isDisabled ? 'disabled' : ''}" 
-                  data-date="${day.dateStr}"
-                  ${day.isDisabled ? 'disabled' : ''}
-                >
-                  ${day.dayNumber}
-                </button>
-              `).join('')}
-            </div>
-          </div>
+          ${viewMonths === 2 && grid2 ? this.renderMonthPanel(nextMonthMeta.year, nextMonthMeta.month, grid2, true) : ''}
         </div>
 
         ${enableTime ? `
@@ -571,8 +597,8 @@ class NexusDatePicker extends HTMLElement {
     triggerBtn.addEventListener('keydown', this.handleKeydown);
     dropdownEl.addEventListener('keydown', this.handleKeydown);
 
-    this.shadowRoot.querySelector('.btn-prev').addEventListener('click', () => this.prevMonth());
-    this.shadowRoot.querySelector('.btn-next').addEventListener('click', () => this.nextMonth());
+    this.shadowRoot.querySelector('.btn-prev')?.addEventListener('click', () => this.prevMonth());
+    this.shadowRoot.querySelector('.btn-next')?.addEventListener('click', () => this.nextMonth());
 
     if (enableTime) {
       const timeInput = this.shadowRoot.querySelector('.time-input');
